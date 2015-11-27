@@ -1,0 +1,148 @@
+body {
+  background-color: #171616;
+  color: #fff;
+  padding: 0px;
+  margin: 0px;
+}
+
+.viewport {
+  max-width: 767px;
+  margin: 0 auto;
+  padding: 5px;
+  height: 100vh;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
+  flex-flow: column nowrap;
+  color: #dfdfdf;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.viewport > div{
+  padding: 5px;
+}
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: bold;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  line-height: 30px;
+  padding: 5px 10px;
+}
+header .left {
+  float: left;
+}
+header .right {
+  float: right;
+}
+.viewport .content {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-content: stretch;
+  -ms-flex-line-pack: stretch;
+  align-content: stretch;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+.viewport .footer {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 100px;
+  -ms-flex: 0 1 100px;
+  flex: 0 1 100px;
+  padding: 0px;
+}
+
+.viewport .content #main {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+}
+
+.viewport .footer .container {
+  overflow: hidden;
+  margin: 0 auto;
+  position: relative;
+}
+
+#date {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  height: 90px;
+}
+#date > li {
+  padding: 5px;
+  text-align: center;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
+#date > li .m{
+  font-size: 12px;
+  line-height: 1.2;
+}
+#date > li .d{
+  font-size: 28px;
+  line-height: 1.5;
+}
+#date > li .w{
+  font-size: 12px;
+  line-height: 1.2;
+  color: #a3a3a3;
+}
+
+#date > li > div {
+  -webkit-transition: color 0.5s linear;
+  transition: color 0.5s linear;
+}
+#date > li.active > div {
+  color: #f3dd70;
+}
+
+/* screen width*/
+@media only screen and (min-width: 800px) {
+  .viewport {
+    width: 670px;
+  }
+}
+
+/* mobile*/
+@media handheld, only screen and (max-width: 767px){
+}
+
+/* retina*/
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+       only screen and (min-resolution: 144dpi) {
+    /* Style adjustments for viewports that meet the condition */
+}
+
