@@ -22,3 +22,9 @@ Deom 链接： https://chemzqm.github.io/dribbble-effects/friday.html
 * ios9 safari 不支持状态栏透明，所以现在只能是白色, 详情访问[此链接](https://forums.developer.apple.com/thread/9819)
 
 * 不支持横屏(确切说这个效果不知道如何支持)，但是现在大部分浏览器并不支持[锁屏的 API](https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation), 所以就将就下吧，毕竟只是为了实现效果
+
+## 本地运行
+
+    npm install
+    gulp
+    open http://localhost:3000/example/index.html
