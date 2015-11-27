@@ -4,9 +4,20 @@ webpackJsonp([0,1],[
 
 	
 	if (window.navigator.standalone) {
+	  // stop stupid safari over scroll
 	  document.addEventListener('touchmove', function(e) {
 	    e.preventDefault()
 	  })
+	}
+	
+	screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+	
+	try {
+	  if (screen.lockOrientationUniversal("landscape-primary")) {
+	    // only works for Chrome for Android
+	    // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
+	  }
+	} catch(e) {
 	}
 	
 	var Friday = __webpack_require__(1).friday
@@ -16,22 +27,29 @@ webpackJsonp([0,1],[
 	var f = new Friday(el, dateEl)
 	
 	// show time
-	function animate() {
-	  f.process.then(function() {
-	    return f.next()
-	  }).then(function() {
-	    return f.wait(200)
-	  }).then(function() {
-	    return f.prev()
-	  }).then(function() {
-	    animate()
-	  }).catch(function() {
-	    return false
-	  })
+	f.process.then(function() {
+	  if (stopped) return Promise.reject()
+	  return f.next()
+	}).then(function() {
+	  if (stopped) return Promise.reject()
+	  return f.wait(200)
+	}).then(function() {
+	  if (stopped) return Promise.reject()
+	  return f.prev()
+	}).then(function() {
+	  if (stopped) return Promise.reject()
+	}).catch(function() {
+	  return false
+	})
+	
+	var stopped
+	function stop() {
+	  stopped = true
 	}
 	
-	animate()
-	
+	var container = document.querySelector('.container')
+	container.addEventListener('touchstart', stop, false)
+	container.addEventListener('mousedown', stop, false)
 
 
 /***/ },
@@ -207,7 +225,7 @@ webpackJsonp([0,1],[
 	  this.x = view.width/2
 	  var th = view.th
 	  var h = view.height - th
-	  this.y = Math.min(view.width/2, h/2)
+	  this.y = h/2 - 20
 	  // min padding
 	  var pad = 50
 	  this.r = Math.min(this.x, this.y) - pad
@@ -372,7 +390,7 @@ webpackJsonp([0,1],[
 	  var th = view.th
 	  var h = view.height - th
 	  this.x = view.width/2
-	  this.y = Math.min(view.width/2, h/2)
+	  this.y = h/2 - 20
 	}
 	
 	Icon.prototype.draw = function () {
@@ -437,11 +455,11 @@ webpackJsonp([0,1],[
 	  } else {
 	    this.rect(r+2)
 	  }
-	  var m = 0.2
+	  var m = 0.3
 	  var p = percent/m
 	  if (p <= 1) {
 	    var translate = - width*p
-	    var opacity = 0.4*(1 - p)
+	    var opacity = 0.5*(1 - p)
 	    this.content(translate, opacity)
 	    var mx = this.x - width/2 - width
 	    var my = this.y - height/2
@@ -682,6 +700,7 @@ webpackJsonp([0,1],[
 	var has3d = detect.has3d
 	var transform = detect.transform
 	var Emitter = __webpack_require__(12)
+	var tap = __webpack_require__(30)
 	
 	function createDates(n) {
 	  var oneday = 24*3600*1000
@@ -702,6 +721,8 @@ webpackJsonp([0,1],[
 	
 	// item width
 	var width = 90
+	
+	var hastouch = 'ontouchstart' in window
 	
 	function Footer(el) {
 	  this.el = el
@@ -724,7 +745,15 @@ webpackJsonp([0,1],[
 	  this.docEvents = events(document, this)
 	  this.events.bind('touchstart')
 	  this.events.bind('touchmove')
+	  this.events.bind('mousedown', 'ontouchstart')
+	  this.events.bind('mousemove', 'ontouchmove')
+	  if (hastouch) {
+	    this.events.bind('touchstart li', 'ontap')
+	  } else {
+	    this.events.bind('click li')
+	  }
 	  this.docEvents.bind('touchend')
+	  this.docEvents.bind('mouseup', 'ontouchend')
 	}
 	
 	Emitter(Footer.prototype)
@@ -744,6 +773,7 @@ webpackJsonp([0,1],[
 	
 	Footer.prototype.active = function (index) {
 	  if (this.actived && this.actived === index) return
+	  if (this.tween) this.tween.stop()
 	  this.emit('change',  index)
 	  var list = this.el.children
 	  for (var i = 0, l = list.length; i < l; i++) {
@@ -764,6 +794,7 @@ webpackJsonp([0,1],[
 	  } else {
 	    s[transform] = 'translateX(' + x + 'px)'
 	  }
+	
 	  this.x = x
 	}
 	
@@ -783,22 +814,29 @@ webpackJsonp([0,1],[
 	  return this.animate(x)
 	}
 	
-	Footer.prototype.animate = function (x) {
+	Footer.prototype.animate = function (x, ease, duration) {
+	  ease = ease || 'out-quad'
+	  duration = duration || 300
 	  var tween = this.tween = Tween({x : this.x})
-	  .ease('out-quad')
+	  .ease(ease)
 	  .to({x : x})
-	  .duration(600)
+	  .duration(duration)
 	
 	  var self = this
 	  tween.update(function(o){
 	    self.translate(o.x)
 	  })
 	
-	  var promise = new Promise(function (resolve) {
+	  var promise = new Promise(function (resolve, reject) {
+	    var rejected
+	    tween.on('stop', function () {
+	      rejected = true
+	      reject()
+	    })
 	    tween.on('end', function(){
 	      self.tween = null
 	      animate = function(){} // eslint-disable-line
-	      resolve()
+	      if (!rejected) resolve()
 	    })
 	  })
 	
@@ -811,29 +849,123 @@ webpackJsonp([0,1],[
 	  return promise
 	}
 	
+	Footer.prototype.onclick = function (e) {
+	  var li = e.delegateTarget
+	  var children = this.el.children
+	  var index
+	  for (var i = 0, l = children.length; i < l; i++) {
+	    if (li === children[i]) {
+	      index = i
+	      break;
+	    }
+	  }
+	  this.active(index)
+	}
+	
+	Footer.prototype.ontap = tap(Footer.prototype.onclick)
+	
 	Footer.prototype.ontouchstart = function (e) {
-	  if (this.tween) return
-	  this.px = e.touches[0].pageX
+	  if (this.tween) this.tween.stop()
+	  var touch = this.getTouch(e)
+	  this.px = touch.pageX
 	  this.sx = this.x
+	  this.dx = 0
+	  this.ts = Date.now()
+	  this.pageX = touch.pageX
+	  this.down = {
+	    x: touch.pageX,
+	    y: touch.pageY,
+	    start: this.x,
+	    at: this.ts
+	  }
 	}
 	
 	Footer.prototype.ontouchmove = function (e) {
-	  if (this.tween || !this.px) return
-	  var dx = e.touches[0].pageX - this.px
+	  if (!this.down) return
+	  if (this.tween) this.tween.stop()
+	  e.preventDefault()
+	  var touch = this.getTouch(e)
+	  var dx = touch.pageX - this.px
+	  if (!this.pageX) this.pageX = touch.pageX
+	  //calculate speed every 100 milisecond
+	  this.calcuteSpeed(touch.pageX)
+	
 	  var x = this.sx + dx
 	  x = Math.min(width/3, x)
 	  x = Math.max(x, - (this.total - this.count)*width - width/3)
 	  this.translate(x)
 	}
 	
-	Footer.prototype.ontouchend = function () {
-	  if (!this.px) return
-	  this.ps = this.sx = null
-	  var n = Math.round(Math.abs(this.x)/width)
-	  var cur = n + this.count - 1
-	  this.active(cur)
-	  this.animate(-n*width)
+	Footer.prototype.ontouchend = function (e) {
+	  if (!this.down) return
+	  var touch = this.getTouch(e)
+	  this.calcuteSpeed(touch.pageX)
+	  var m = this.momentum()
+	  this.ps = this.down = this.sx = null
+	  if (isNaN(m.x)) {
+	    // WTF
+	    return
+	  }
+	  this.animate(m.x, m.ease, m.duration).catch(function () {
+	  })
 	}
+	
+	Footer.prototype.getTouch = function (e) {
+	  if (e.changedTouches && e.changedTouches.length > 0) {
+	    return e.changedTouches[0]
+	  }
+	  return e
+	}
+	
+	Footer.prototype.momentum = function () {
+	  var deceleration = 0.0004
+	  var speed = this.speed
+	  var x = this.x
+	  speed = Math.min(speed, 0.6)
+	  var minX = - (this.total - this.count)*width
+	  var destination = x + ( speed * speed ) / ( 2 * deceleration ) * ( this.distance < 0 ? -1 : 1 )
+	  var duration = speed / deceleration
+	  var newX
+	  var ease = 'out-cube'
+	  if (destination > 0) {
+	    newX = 0
+	    ease = 'out-back'
+	  } else if (destination < minX) {
+	    newX = minX
+	    ease = 'out-back'
+	  }
+	  if (typeof newX === 'number') {
+	    duration = duration*Math.abs((newX - x + 50)/(destination - x))
+	    //duration = Math.max(200, duration)
+	    destination = newX
+	  }
+	  if (x > 0 || x < minX) {
+	    duration = 500
+	    ease = 'out-circ'
+	  }
+	  destination = Math.round(destination/width)*width
+	  return {
+	    x: destination,
+	    duration: duration,
+	    ease: ease
+	  }
+	}
+	
+	
+	Footer.prototype.calcuteSpeed = function (x) {
+	  var ts = Date.now()
+	  var dt = ts - this.ts
+	  if (ts - this.down.at < 100) {
+	    this.distance = x - this.pageX
+	    this.speed = Math.abs(this.distance/dt)
+	  } else if(dt > 100){
+	    this.distance = x - this.pageX
+	    this.speed = Math.abs(this.distance/dt)
+	    this.ts = ts
+	    this.pageX = x
+	  }
+	}
+	
 	module.exports = Footer
 
 
@@ -2127,6 +2259,100 @@ webpackJsonp([0,1],[
 	  exports.all = obj.all;
 	  return exports;
 	};
+
+
+/***/ },
+/* 30 */
+/***/ function(module, exports) {
+
+	var endEvents = [
+	  'touchend'
+	]
+	
+	module.exports = Tap
+	
+	// default tap timeout in ms
+	Tap.timeout = 200
+	
+	function Tap(callback, options) {
+	  options = options || {}
+	  // if the user holds his/her finger down for more than 200ms,
+	  // then it's not really considered a tap.
+	  // however, you can make this configurable.
+	  var timeout = options.timeout || Tap.timeout
+	
+	  // to keep track of the original listener
+	  listener.handler = callback
+	
+	  return listener
+	
+	  // el.addEventListener('touchstart', listener)
+	  function listener(e1) {
+	    // tap should only happen with a single finger
+	    if (!e1.touches || e1.touches.length > 1) return
+	
+	    var el = e1.target
+	    var context = this
+	    var args = arguments;
+	
+	    var timeout_id = setTimeout(cleanup, timeout)
+	
+	    el.addEventListener('touchmove', cleanup)
+	
+	    endEvents.forEach(function (event) {
+	      el.addEventListener(event, done)
+	    })
+	
+	    function done(e2) {
+	      // since touchstart is added on the same tick
+	      // and because of bubbling,
+	      // it'll execute this on the same touchstart.
+	      // this filters out the same touchstart event.
+	      if (e1 === e2) return
+	      if (e2.clientX !== e1.clientX || e2.clientY !== e1.clientY) return
+	
+	      cleanup()
+	
+	      // already handled
+	      if (e2.defaultPrevented) return
+	
+	      // overwrite these functions so that they all to both start and events.
+	      var preventDefault = e1.preventDefault
+	      var stopPropagation = e1.stopPropagation
+	
+	      e1.stopPropagation = function () {
+	        stopPropagation.call(e1)
+	        stopPropagation.call(e2)
+	      }
+	
+	      e1.preventDefault = function () {
+	        preventDefault.call(e1)
+	        preventDefault.call(e2)
+	      }
+	
+	      // calls the handler with the `end` event,
+	      // but i don't think it matters.
+	      callback.apply(context, args)
+	    }
+	
+	    // cleanup end events
+	    // to cancel the tap, just run this early
+	    function cleanup(e2) {
+	      // if it's the same event as the origin,
+	      // then don't actually cleanup.
+	      // hit issues with this - don't remember
+	      if (e1 === e2) return
+	
+	      clearTimeout(timeout_id)
+	
+	      el.removeEventListener('touchmove', cleanup)
+	
+	      endEvents.forEach(function (event) {
+	        el.removeEventListener(event, done)
+	      })
+	    }
+	  }
+	}
 
 
 /***/ }

@@ -10,38 +10,72 @@ body {
   margin: 0 auto;
   padding: 5px;
   height: 100vh;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
   color: #dfdfdf;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .viewport > div{
   padding: 5px;
 }
-.viewport .header {
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   text-align: center;
   font-weight: bold;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 20px;
+  font-size: 24px;
+  line-height: 30px;
+  padding: 5px 10px;
 }
-.viewport .content {
-  flex: 1 0 auto;
-  display: flex;
-  align-content: stretch;
-  flex-flow: row nowrap;
-  justify-content: center;
-}
-.viewport .header .left {
+header .left {
   float: left;
 }
-.viewport .header .right {
+header .right {
   float: right;
 }
+.viewport .content {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-content: stretch;
+  -ms-flex-line-pack: stretch;
+  align-content: stretch;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
 .viewport .footer {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 100px;
+  -ms-flex: 0 1 100px;
   flex: 0 1 100px;
   padding: 0px;
 }
 
 .viewport .content #main {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
   flex: 1 0 auto;
 }
 
@@ -55,13 +89,21 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
   height: 90px;
 }
 #date > li {
   padding: 5px;
   text-align: center;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
   flex: 0 0 auto;
 }
 
@@ -80,6 +122,7 @@ body {
 }
 
 #date > li > div {
+  -webkit-transition: color 0.5s linear;
   transition: color 0.5s linear;
 }
 #date > li.active > div {
@@ -102,3 +145,4 @@ body {
        only screen and (min-resolution: 144dpi) {
     /* Style adjustments for viewports that meet the condition */
 }
+

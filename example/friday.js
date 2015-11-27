@@ -1,8 +1,19 @@
 
 if (window.navigator.standalone) {
+  // stop stupid safari over scroll
   document.addEventListener('touchmove', function(e) {
     e.preventDefault()
   })
+}
+
+screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+
+try {
+  if (screen.lockOrientationUniversal("landscape-primary")) {
+    // only works for Chrome for Android
+    // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
+  }
+} catch(e) {
 }
 
 var Friday = require('..').friday
@@ -12,19 +23,26 @@ var dateEl = document.getElementById('date')
 var f = new Friday(el, dateEl)
 
 // show time
-function animate() {
-  f.process.then(function() {
-    return f.next()
-  }).then(function() {
-    return f.wait(200)
-  }).then(function() {
-    return f.prev()
-  }).then(function() {
-    animate()
-  }).catch(function() {
-    return false
-  })
+f.process.then(function() {
+  if (stopped) return Promise.reject()
+  return f.next()
+}).then(function() {
+  if (stopped) return Promise.reject()
+  return f.wait(200)
+}).then(function() {
+  if (stopped) return Promise.reject()
+  return f.prev()
+}).then(function() {
+  if (stopped) return Promise.reject()
+}).catch(function() {
+  return false
+})
+
+var stopped
+function stop() {
+  stopped = true
 }
 
-animate()
-
+var container = document.querySelector('.container')
+container.addEventListener('touchstart', stop, false)
+container.addEventListener('mousedown', stop, false)
