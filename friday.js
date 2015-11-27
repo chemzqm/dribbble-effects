@@ -7,13 +7,12 @@ if (window.navigator.standalone) {
 }
 
 screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
-
 try {
-  if (screen.lockOrientationUniversal("landscape-primary")) {
-    // only works for Chrome for Android
-    // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
-  }
-} catch(e) {
+if (screen.lockOrientationUniversal && screen.lockOrientationUniversal("landscape-primary")) {
+  // only works for Chrome for Android
+  // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
+}
+} catch (e) {
 }
 
 var Friday = require('..').friday
