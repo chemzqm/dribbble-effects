@@ -1,0 +1,42 @@
+{
+  "name": "dribbble-effects",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {},
+  "author": "chemzqm@gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "css-loader": "^0.23.0",
+    "file-loader": "^0.8.5",
+    "growl": "^1.8.1",
+    "gulp": "^3.9.0",
+    "gulp-live-serve": "^1.0.1",
+    "gulp-livereload": "^3.8.1",
+    "gulp-util": "^3.0.7",
+    "html-loader": "^0.4.0",
+    "json-loader": "^0.5.4",
+    "style-loader": "^0.13.0",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.12.9"
+  },
+  "dependencies": {
+    "autoscale-canvas": "0.0.3",
+    "component-emitter": "^1.2.0",
+    "component-events": "^1.0.9",
+    "component-raf": "^1.2.0",
+    "component-tween": "^1.2.0",
+    "domify": "^1.4.0",
+    "prop-detect": "^1.0.0",
+    "scrollfix": "0.0.2"
+  },
+  "browser": {
+    "raf": "component-raf",
+    "events": "component-events",
+    "tween": "component-tween",
+    "emitter": "component-emitter"
+  }
+}

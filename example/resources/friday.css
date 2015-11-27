@@ -1,0 +1,104 @@
+body {
+  background-color: #171616;
+  color: #fff;
+  padding: 0px;
+  margin: 0px;
+}
+
+.viewport {
+  max-width: 767px;
+  margin: 0 auto;
+  padding: 5px;
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+  color: #dfdfdf;
+}
+.viewport > div{
+  padding: 5px;
+}
+.viewport .header {
+  text-align: center;
+  font-weight: bold;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 20px;
+}
+.viewport .content {
+  flex: 1 0 auto;
+  display: flex;
+  align-content: stretch;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+.viewport .header .left {
+  float: left;
+}
+.viewport .header .right {
+  float: right;
+}
+.viewport .footer {
+  flex: 0 1 100px;
+  padding: 0px;
+}
+
+.viewport .content #main {
+  flex: 1 0 auto;
+}
+
+.viewport .footer .container {
+  overflow: hidden;
+  margin: 0 auto;
+  position: relative;
+}
+
+#date {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-flow: row nowrap;
+  height: 90px;
+}
+#date > li {
+  padding: 5px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+#date > li .m{
+  font-size: 12px;
+  line-height: 1.2;
+}
+#date > li .d{
+  font-size: 28px;
+  line-height: 1.5;
+}
+#date > li .w{
+  font-size: 12px;
+  line-height: 1.2;
+  color: #a3a3a3;
+}
+
+#date > li > div {
+  transition: color 0.5s linear;
+}
+#date > li.active > div {
+  color: #f3dd70;
+}
+
+/* screen width*/
+@media only screen and (min-width: 800px) {
+  .viewport {
+    width: 670px;
+  }
+}
+
+/* mobile*/
+@media handheld, only screen and (max-width: 767px){
+}
+
+/* retina*/
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+       only screen and (min-resolution: 144dpi) {
+    /* Style adjustments for viewports that meet the condition */
+}
