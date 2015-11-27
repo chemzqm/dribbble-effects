@@ -1,6 +1,6 @@
 # Dribbble-effects
 
-[dribbble](https://dribbble.com/) 上动画效果的实现。目前只有一个:
+[dribbble](https://dribbble.com/) 上动画效果的 Javascript 实现。目前只有一个:
 
 
 原效果图：
