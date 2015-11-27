@@ -228,7 +228,7 @@ webpackJsonp([0,1],[
 	  this.y = h/2 - 20
 	  // min padding
 	  var pad = 50
-	  this.r = Math.min(this.x, this.y) - pad
+	  this.r = Math.max(100, Math.min(this.x, this.y) - pad)
 	  this.gray = util.toRgba(gray, 0.1)
 	  this.tails = []
 	}
