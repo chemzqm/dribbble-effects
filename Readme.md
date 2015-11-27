@@ -13,10 +13,11 @@ Deom 链接： https://chemzqm.github.io/dribbble-effects/friday.html
 
 ![链接](https://cloud.githubusercontent.com/assets/251450/11446265/4a7bb3fe-956f-11e5-8de5-918b6bca4628.png)
 
+使用 iphone safari 保存到桌面再打开体验更佳。
 
 项目只在最新版 Chrome 和 Safari 上进行了测试，其它浏览器估计不会去支持，不过欢迎反馈意见。实现上只使用了基础的 canvas，css transform 和 css transition, 所以浏览器支持应该问题不大。
 
-使用 iphone safari 保存到桌面再打开体验更佳，不过需要注意：
+已知问题：
 
 * ios9 safari 不支持状态栏透明，所以现在只能是白色, 详情访问[此链接](https://forums.developer.apple.com/thread/9819)
 
