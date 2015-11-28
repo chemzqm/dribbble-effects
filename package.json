@@ -10,7 +10,6 @@
   "author": "chemzqm@gmail.com",
   "license": "MIT",
   "devDependencies": {
-    "component-tap-event": "^1.1.0",
     "css-loader": "^0.23.0",
     "file-loader": "^0.8.5",
     "growl": "^1.8.1",
@@ -25,6 +24,7 @@
     "webpack": "^1.12.9"
   },
   "dependencies": {
+    "component-tap-event": "^1.1.0",
     "autoscale-canvas": "0.0.3",
     "component-emitter": "^1.2.0",
     "component-events": "^1.0.9",
