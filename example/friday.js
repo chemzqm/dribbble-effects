@@ -1,4 +1,4 @@
-
+var Promise = require('es6-promise-polyfill').Promise
 if (window.navigator.standalone) {
   // stop stupid safari over scroll
   document.addEventListener('touchmove', function(e) {
@@ -12,8 +12,7 @@ if (screen.lockOrientationUniversal && screen.lockOrientationUniversal("landscap
   // only works for Chrome for Android
   // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
 }
-} catch (e) {
-}
+} catch (e) { } // eslint-disable-line
 
 var Friday = require('..').friday
 

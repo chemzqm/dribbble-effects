@@ -24,13 +24,14 @@
     "webpack": "^1.12.9"
   },
   "dependencies": {
-    "component-tap-event": "^1.1.0",
     "autoscale-canvas": "0.0.3",
     "component-emitter": "^1.2.0",
     "component-events": "^1.0.9",
     "component-raf": "^1.2.0",
+    "component-tap-event": "^1.1.0",
     "component-tween": "^1.2.0",
     "domify": "^1.4.0",
+    "es6-promise-polyfill": "^1.1.1",
     "prop-detect": "^1.0.0",
     "scrollfix": "0.0.2"
   },
