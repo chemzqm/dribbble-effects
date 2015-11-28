@@ -2,7 +2,7 @@ webpackJsonp([0,1],[
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
+	var Promise = __webpack_require__(1).Promise
 	if (window.navigator.standalone) {
 	  // stop stupid safari over scroll
 	  document.addEventListener('touchmove', function(e) {
@@ -16,10 +16,9 @@ webpackJsonp([0,1],[
 	  // only works for Chrome for Android
 	  // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
 	}
-	} catch (e) {
-	}
+	} catch (e) { } // eslint-disable-line
 	
-	var Friday = __webpack_require__(1).friday
+	var Friday = __webpack_require__(4).friday
 	
 	var el = document.getElementById('main')
 	var dateEl = document.getElementById('date')
@@ -55,20 +54,543 @@ webpackJsonp([0,1],[
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.friday = __webpack_require__(2)
-
+	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, setImmediate) {(function(global){
+	
+	//
+	// Check for native Promise and it has correct interface
+	//
+	
+	var NativePromise = global['Promise'];
+	var nativePromiseSupported =
+	  NativePromise &&
+	  // Some of these methods are missing from
+	  // Firefox/Chrome experimental implementations
+	  'resolve' in NativePromise &&
+	  'reject' in NativePromise &&
+	  'all' in NativePromise &&
+	  'race' in NativePromise &&
+	  // Older version of the spec had a resolver object
+	  // as the arg rather than a function
+	  (function(){
+	    var resolve;
+	    new NativePromise(function(r){ resolve = r; });
+	    return typeof resolve === 'function';
+	  })();
+	
+	
+	//
+	// export if necessary
+	//
+	
+	if (typeof exports !== 'undefined' && exports)
+	{
+	  // node.js
+	  exports.Promise = nativePromiseSupported ? NativePromise : Promise;
+	}
+	else
+	{
+	  // AMD
+	  if (true)
+	  {
+	    !(__WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	      return nativePromiseSupported ? NativePromise : Promise;
+	    }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  }
+	  else
+	  {
+	    // in browser add to global
+	    if (!nativePromiseSupported)
+	      global['Promise'] = Promise;
+	  }
+	}
+	
+	
+	//
+	// Polyfill
+	//
+	
+	var PENDING = 'pending';
+	var SEALED = 'sealed';
+	var FULFILLED = 'fulfilled';
+	var REJECTED = 'rejected';
+	var NOOP = function(){};
+	
+	// async calls
+	var asyncSetTimer = typeof setImmediate !== 'undefined' ? setImmediate : setTimeout;
+	var asyncQueue = [];
+	var asyncTimer;
+	
+	function asyncFlush(){
+	  // run promise callbacks
+	  for (var i = 0; i < asyncQueue.length; i++)
+	    asyncQueue[i][0](asyncQueue[i][1]);
+	
+	  // reset async asyncQueue
+	  asyncQueue = [];
+	  asyncTimer = false;
+	}
+	
+	function asyncCall(callback, arg){
+	  asyncQueue.push([callback, arg]);
+	
+	  if (!asyncTimer)
+	  {
+	    asyncTimer = true;
+	    asyncSetTimer(asyncFlush, 0);
+	  }
+	}
+	
+	
+	function invokeResolver(resolver, promise) {
+	  function resolvePromise(value) {
+	    resolve(promise, value);
+	  }
+	
+	  function rejectPromise(reason) {
+	    reject(promise, reason);
+	  }
+	
+	  try {
+	    resolver(resolvePromise, rejectPromise);
+	  } catch(e) {
+	    rejectPromise(e);
+	  }
+	}
+	
+	function invokeCallback(subscriber){
+	  var owner = subscriber.owner;
+	  var settled = owner.state_;
+	  var value = owner.data_;  
+	  var callback = subscriber[settled];
+	  var promise = subscriber.then;
+	
+	  if (typeof callback === 'function')
+	  {
+	    settled = FULFILLED;
+	    try {
+	      value = callback(value);
+	    } catch(e) {
+	      reject(promise, e);
+	    }
+	  }
+	
+	  if (!handleThenable(promise, value))
+	  {
+	    if (settled === FULFILLED)
+	      resolve(promise, value);
+	
+	    if (settled === REJECTED)
+	      reject(promise, value);
+	  }
+	}
+	
+	function handleThenable(promise, value) {
+	  var resolved;
+	
+	  try {
+	    if (promise === value)
+	      throw new TypeError('A promises callback cannot return that same promise.');
+	
+	    if (value && (typeof value === 'function' || typeof value === 'object'))
+	    {
+	      var then = value.then;  // then should be retrived only once
+	
+	      if (typeof then === 'function')
+	      {
+	        then.call(value, function(val){
+	          if (!resolved)
+	          {
+	            resolved = true;
+	
+	            if (value !== val)
+	              resolve(promise, val);
+	            else
+	              fulfill(promise, val);
+	          }
+	        }, function(reason){
+	          if (!resolved)
+	          {
+	            resolved = true;
+	
+	            reject(promise, reason);
+	          }
+	        });
+	
+	        return true;
+	      }
+	    }
+	  } catch (e) {
+	    if (!resolved)
+	      reject(promise, e);
+	
+	    return true;
+	  }
+	
+	  return false;
+	}
+	
+	function resolve(promise, value){
+	  if (promise === value || !handleThenable(promise, value))
+	    fulfill(promise, value);
+	}
+	
+	function fulfill(promise, value){
+	  if (promise.state_ === PENDING)
+	  {
+	    promise.state_ = SEALED;
+	    promise.data_ = value;
+	
+	    asyncCall(publishFulfillment, promise);
+	  }
+	}
+	
+	function reject(promise, reason){
+	  if (promise.state_ === PENDING)
+	  {
+	    promise.state_ = SEALED;
+	    promise.data_ = reason;
+	
+	    asyncCall(publishRejection, promise);
+	  }
+	}
+	
+	function publish(promise) {
+	  promise.then_ = promise.then_.forEach(invokeCallback);
+	}
+	
+	function publishFulfillment(promise){
+	  promise.state_ = FULFILLED;
+	  publish(promise);
+	}
+	
+	function publishRejection(promise){
+	  promise.state_ = REJECTED;
+	  publish(promise);
+	}
+	
+	/**
+	* @class
+	*/
+	function Promise(resolver){
+	  if (typeof resolver !== 'function')
+	    throw new TypeError('Promise constructor takes a function argument');
+	
+	  if (this instanceof Promise === false)
+	    throw new TypeError('Failed to construct \'Promise\': Please use the \'new\' operator, this object constructor cannot be called as a function.');
+	
+	  this.then_ = [];
+	
+	  invokeResolver(resolver, this);
+	}
+	
+	Promise.prototype = {
+	  constructor: Promise,
+	
+	  state_: PENDING,
+	  then_: null,
+	  data_: undefined,
+	
+	  then: function(onFulfillment, onRejection){
+	    var subscriber = {
+	      owner: this,
+	      then: new this.constructor(NOOP),
+	      fulfilled: onFulfillment,
+	      rejected: onRejection
+	    };
+	
+	    if (this.state_ === FULFILLED || this.state_ === REJECTED)
+	    {
+	      // already resolved, call callback async
+	      asyncCall(invokeCallback, subscriber);
+	    }
+	    else
+	    {
+	      // subscribe
+	      this.then_.push(subscriber);
+	    }
+	
+	    return subscriber.then;
+	  },
+	
+	  'catch': function(onRejection) {
+	    return this.then(null, onRejection);
+	  }
+	};
+	
+	Promise.all = function(promises){
+	  var Class = this;
+	
+	  if (!Array.isArray(promises))
+	    throw new TypeError('You must pass an array to Promise.all().');
+	
+	  return new Class(function(resolve, reject){
+	    var results = [];
+	    var remaining = 0;
+	
+	    function resolver(index){
+	      remaining++;
+	      return function(value){
+	        results[index] = value;
+	        if (!--remaining)
+	          resolve(results);
+	      };
+	    }
+	
+	    for (var i = 0, promise; i < promises.length; i++)
+	    {
+	      promise = promises[i];
+	
+	      if (promise && typeof promise.then === 'function')
+	        promise.then(resolver(i), reject);
+	      else
+	        results[i] = promise;
+	    }
+	
+	    if (!remaining)
+	      resolve(results);
+	  });
+	};
+	
+	Promise.race = function(promises){
+	  var Class = this;
+	
+	  if (!Array.isArray(promises))
+	    throw new TypeError('You must pass an array to Promise.race().');
+	
+	  return new Class(function(resolve, reject) {
+	    for (var i = 0, promise; i < promises.length; i++)
+	    {
+	      promise = promises[i];
+	
+	      if (promise && typeof promise.then === 'function')
+	        promise.then(resolve, reject);
+	      else
+	        resolve(promise);
+	    }
+	  });
+	};
+	
+	Promise.resolve = function(value){
+	  var Class = this;
+	
+	  if (value && typeof value === 'object' && value.constructor === Class)
+	    return value;
+	
+	  return new Class(function(resolve){
+	    resolve(value);
+	  });
+	};
+	
+	Promise.reject = function(reason){
+	  var Class = this;
+	
+	  return new Class(function(resolve, reject){
+	    reject(reason);
+	  });
+	};
+	
+	})(typeof window != 'undefined' ? window : typeof global != 'undefined' ? global : typeof self != 'undefined' ? self : this);
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(2).setImmediate))
 
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Circle = __webpack_require__(3)
-	var Icon = __webpack_require__(6)
-	var Time = __webpack_require__(7)
-	var autoscale = __webpack_require__(8)
-	var raf = __webpack_require__(9)
-	var Footer = __webpack_require__(10)
-	var Emitter = __webpack_require__(12)
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(3).nextTick;
+	var apply = Function.prototype.apply;
+	var slice = Array.prototype.slice;
+	var immediateIds = {};
+	var nextImmediateId = 0;
+	
+	// DOM APIs, for completeness
+	
+	exports.setTimeout = function() {
+	  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+	};
+	exports.setInterval = function() {
+	  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+	};
+	exports.clearTimeout =
+	exports.clearInterval = function(timeout) { timeout.close(); };
+	
+	function Timeout(id, clearFn) {
+	  this._id = id;
+	  this._clearFn = clearFn;
+	}
+	Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+	Timeout.prototype.close = function() {
+	  this._clearFn.call(window, this._id);
+	};
+	
+	// Does not start the time, just sets up the members needed.
+	exports.enroll = function(item, msecs) {
+	  clearTimeout(item._idleTimeoutId);
+	  item._idleTimeout = msecs;
+	};
+	
+	exports.unenroll = function(item) {
+	  clearTimeout(item._idleTimeoutId);
+	  item._idleTimeout = -1;
+	};
+	
+	exports._unrefActive = exports.active = function(item) {
+	  clearTimeout(item._idleTimeoutId);
+	
+	  var msecs = item._idleTimeout;
+	  if (msecs >= 0) {
+	    item._idleTimeoutId = setTimeout(function onTimeout() {
+	      if (item._onTimeout)
+	        item._onTimeout();
+	    }, msecs);
+	  }
+	};
+	
+	// That's not how node.js implements it but the exposed api is the same.
+	exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+	  var id = nextImmediateId++;
+	  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+	
+	  immediateIds[id] = true;
+	
+	  nextTick(function onNextTick() {
+	    if (immediateIds[id]) {
+	      // fn.call() is faster so we optimize for the common use-case
+	      // @see http://jsperf.com/call-apply-segu
+	      if (args) {
+	        fn.apply(null, args);
+	      } else {
+	        fn.call(null);
+	      }
+	      // Prevent ids from leaking
+	      exports.clearImmediate(id);
+	    }
+	  });
+	
+	  return id;
+	};
+	
+	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+	  delete immediateIds[id];
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2).setImmediate, __webpack_require__(2).clearImmediate))
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+	
+	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+	
+	function cleanUpNextTick() {
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+	
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = setTimeout(cleanUpNextTick);
+	    draining = true;
+	
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    clearTimeout(timeout);
+	}
+	
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        setTimeout(drainQueue, 0);
+	    }
+	};
+	
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+	
+	function noop() {}
+	
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+	
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+	
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports.friday = __webpack_require__(5)
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Promise = __webpack_require__(1).Promise
+	var Circle = __webpack_require__(6)
+	var Icon = __webpack_require__(9)
+	var Time = __webpack_require__(10)
+	var autoscale = __webpack_require__(11)
+	var raf = __webpack_require__(12)
+	var Footer = __webpack_require__(13)
+	var Emitter = __webpack_require__(15)
 	
 	function View(el, dateEl) {
 	  this.el = el
@@ -206,16 +728,16 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 3 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var gray = '#A4A3A3'
 	var yellow = '#F3DD70'
 	var PI = Math.PI
-	var util = __webpack_require__(4)
+	var util = __webpack_require__(7)
 	var steps = [0, 1, 2, 2, 3, 2, 2, 1, 0, 0]
 	var step_len = steps.length
-	var Tail = __webpack_require__(5)
+	var Tail = __webpack_require__(8)
 	var width = 5
 	
 	function Circle(view) {
@@ -298,7 +820,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 4 */
+/* 7 */
 /***/ function(module, exports) {
 
 	var toRgb = exports.toRgb = function (hex) {
@@ -330,7 +852,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 5 */
+/* 8 */
 /***/ function(module, exports) {
 
 	// 2 degree
@@ -372,10 +894,10 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var util = __webpack_require__(4)
+	var util = __webpack_require__(7)
 	var width = 60
 	var height = 60
 	var pad = 10
@@ -546,14 +1068,14 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 7 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var white = '#dfdfdf'
 	var gray = '#A4A3A3'
 	// second
 	var total = 24*60*60
-	var util = __webpack_require__(4)
+	var util = __webpack_require__(7)
 	
 	function Time(view) {
 	  this.view = view
@@ -621,7 +1143,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 8 */
+/* 11 */
 /***/ function(module, exports) {
 
 	
@@ -647,7 +1169,7 @@ webpackJsonp([0,1],[
 	};
 
 /***/ },
-/* 9 */
+/* 12 */
 /***/ function(module, exports) {
 
 	/**
@@ -687,19 +1209,20 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 10 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Tween = __webpack_require__(11)
-	var raf = __webpack_require__(9)
-	var template = __webpack_require__(16)
-	var domify = __webpack_require__(17)
-	var detect = __webpack_require__(18)
-	var events = __webpack_require__(24)
+	var Promise = __webpack_require__(1).Promise
+	var Tween = __webpack_require__(14)
+	var raf = __webpack_require__(12)
+	var template = __webpack_require__(19)
+	var domify = __webpack_require__(20)
+	var detect = __webpack_require__(21)
+	var events = __webpack_require__(27)
 	var has3d = detect.has3d
 	var transform = detect.transform
-	var Emitter = __webpack_require__(12)
-	var tap = __webpack_require__(30)
+	var Emitter = __webpack_require__(15)
+	var tap = __webpack_require__(33)
 	
 	function createDates(n) {
 	  var oneday = 24*3600*1000
@@ -969,7 +1492,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 11 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -977,10 +1500,10 @@ webpackJsonp([0,1],[
 	 * Module dependencies.
 	 */
 	
-	var Emitter = __webpack_require__(12);
-	var clone = __webpack_require__(13);
-	var type = __webpack_require__(14);
-	var ease = __webpack_require__(15);
+	var Emitter = __webpack_require__(15);
+	var clone = __webpack_require__(16);
+	var type = __webpack_require__(17);
+	var ease = __webpack_require__(18);
 	
 	/**
 	 * Expose `Tween`.
@@ -1152,7 +1675,7 @@ webpackJsonp([0,1],[
 	};
 
 /***/ },
-/* 12 */
+/* 15 */
 /***/ function(module, exports) {
 
 	
@@ -1319,7 +1842,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 13 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1328,9 +1851,9 @@ webpackJsonp([0,1],[
 	
 	var type;
 	try {
-	  type = __webpack_require__(14);
+	  type = __webpack_require__(17);
 	} catch (_) {
-	  type = __webpack_require__(14);
+	  type = __webpack_require__(17);
 	}
 	
 	/**
@@ -1382,7 +1905,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 14 */
+/* 17 */
 /***/ function(module, exports) {
 
 	/**
@@ -1422,7 +1945,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 15 */
+/* 18 */
 /***/ function(module, exports) {
 
 	
@@ -1598,13 +2121,13 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 16 */
+/* 19 */
 /***/ function(module, exports) {
 
 	module.exports = "<li>\n<div class=\"m\">{month}</div>\n<div class=\"d\">{date}</div>\n<div class=\"w\">{week}</div>\n</li>\n";
 
 /***/ },
-/* 17 */
+/* 20 */
 /***/ function(module, exports) {
 
 	
@@ -1722,22 +2245,22 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 18 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.transition = __webpack_require__(19)
+	exports.transition = __webpack_require__(22)
 	
-	exports.transform = __webpack_require__(20)
+	exports.transform = __webpack_require__(23)
 	
-	exports.touchAction = __webpack_require__(21)
+	exports.touchAction = __webpack_require__(24)
 	
-	exports.transitionend = __webpack_require__(22)
+	exports.transitionend = __webpack_require__(25)
 	
-	exports.has3d = __webpack_require__(23)
+	exports.has3d = __webpack_require__(26)
 
 
 /***/ },
-/* 19 */
+/* 22 */
 /***/ function(module, exports) {
 
 	var styles = [
@@ -1763,7 +2286,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 20 */
+/* 23 */
 /***/ function(module, exports) {
 
 	
@@ -1788,7 +2311,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 21 */
+/* 24 */
 /***/ function(module, exports) {
 
 	
@@ -1814,7 +2337,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 22 */
+/* 25 */
 /***/ function(module, exports) {
 
 	/**
@@ -1844,11 +2367,11 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 23 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	var prop = __webpack_require__(20);
+	var prop = __webpack_require__(23);
 	
 	// IE <=8 doesn't have `getComputedStyle`
 	if (!prop || !window.getComputedStyle) {
@@ -1874,7 +2397,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 24 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -1882,8 +2405,8 @@ webpackJsonp([0,1],[
 	 * Module dependencies.
 	 */
 	
-	var events = __webpack_require__(25);
-	var delegate = __webpack_require__(26);
+	var events = __webpack_require__(28);
+	var delegate = __webpack_require__(29);
 	
 	/**
 	 * Expose `Events`.
@@ -2056,7 +2579,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 25 */
+/* 28 */
 /***/ function(module, exports) {
 
 	var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
@@ -2096,15 +2619,15 @@ webpackJsonp([0,1],[
 	};
 
 /***/ },
-/* 26 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 	
-	var closest = __webpack_require__(27)
-	  , event = __webpack_require__(25);
+	var closest = __webpack_require__(30)
+	  , event = __webpack_require__(28);
 	
 	/**
 	 * Delegate event `type` to `selector`
@@ -2144,14 +2667,14 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 27 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module Dependencies
 	 */
 	
-	var matches = __webpack_require__(28)
+	var matches = __webpack_require__(31)
 	
 	/**
 	 * Export `closest`
@@ -2182,14 +2705,14 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 28 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 	
-	var query = __webpack_require__(29);
+	var query = __webpack_require__(32);
 	
 	/**
 	 * Element prototype.
@@ -2234,7 +2757,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 29 */
+/* 32 */
 /***/ function(module, exports) {
 
 	function one(selector, el) {
@@ -2261,7 +2784,7 @@ webpackJsonp([0,1],[
 
 
 /***/ },
-/* 30 */
+/* 33 */
 /***/ function(module, exports) {
 
 	var endEvents = [
