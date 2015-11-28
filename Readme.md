@@ -27,4 +27,4 @@ Deom 链接： https://chemzqm.github.io/dribbble-effects/friday.html
 
     npm install
     gulp
-    open http://localhost:3000/example/index.html
+    open http://localhost:3000/example/friday.html
