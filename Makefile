@@ -1,5 +1,5 @@
 build:
-	@open http://localhost:3000/example/index.html
+	@open http://localhost:3000/example/friday.html
 	@gulp
 
 doc:
