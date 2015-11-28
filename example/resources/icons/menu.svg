@@ -4,9 +4,9 @@
 	 viewBox="0 0 198.129 198.129" style="enable-background:new 0 0 198.129 198.129;" xml:space="preserve">
 <g>
 	<g>
-		<rect x="0" y="28.026" style="fill:#ffffff;" width="198.129" height="6.567"/>
-		<rect x="0" y="95.23" style="fill:#ffffff;" width="198.129" height="6.571"/>
-		<rect x="0" y="163.525" style="fill:#ffffff;" width="198.129" height="6.578"/>
+		<rect x="0" y="28.026" style="fill:inherit;" width="198.129" height="6.567"/>
+		<rect x="0" y="95.23" style="fill:inherit;" width="198.129" height="6.571"/>
+		<rect x="0" y="163.525" style="fill:inherit;" width="198.129" height="6.578"/>
 	</g>
 </g>
 <g>
