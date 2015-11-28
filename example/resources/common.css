@@ -21,5 +21,10 @@
   text-shadow: none;
 }
 
+.icon {
+  height: 18px;
+  width: 18px;
+}
+
 body { font-family: 'ProximaNova-Light' !important; }
 h1, h2, h3, h4 { font-weight: normal; }
