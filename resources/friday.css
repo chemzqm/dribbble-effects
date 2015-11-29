@@ -44,6 +44,10 @@ header .left {
 header .right {
   float: right;
 }
+
+header .icon {
+  margin-top: 5px;
+}
 .viewport .content {
   -webkit-box-flex: 1;
   -webkit-flex: 1 0 auto;
