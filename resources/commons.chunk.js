@@ -2925,25 +2925,31 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Iscroll = __webpack_require__(35)
-	var Loader = __webpack_require__(39)
+	var Loader = __webpack_require__(40)
 	
 	function Ptr(scrollable, cb) {
 	  var is = new Iscroll(scrollable, {
-	    handlebar: true
+	    handlebar: true,
+	    max: 120
 	  })
 	  var loader = new Loader(scrollable.querySelector('.ptr'))
 	  loader.setColor('#1ea3e7')
 	  var stat
 	  is.on('scroll', function (y) {
+	    if (y > 10) return
 	    if (stat == null) {
 	      var el = scrollable.querySelector('.projects > li:first-child .content')
-	      var color = getComputedStyle(el)['background-color']
-	      loader.setColor(color)
+	      if (el) {
+	        var color = getComputedStyle(el)['background-color']
+	        loader.setColor(color)
+	      } else {
+	        loader.setColor('#1ea3e7')
+	      }
 	      loader.draw(y)
 	    }
 	    loader.y = y
 	  })
-	  var duration = 400
+	  var duration = 300
 	  is.on('release', function () {
 	    if (stat != null) return
 	    var y = scrollable.scrollTop
@@ -2978,17 +2984,16 @@
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var detect = __webpack_require__(21)
+	var detect = __webpack_require__(36)
 	var touchAction = detect.touchAction
 	var transform = detect.transform
 	var has3d = detect.has3d
-	var computedStyle = __webpack_require__(36)
 	var Emitter = __webpack_require__(15)
 	var events = __webpack_require__(27)
 	var Tween = __webpack_require__(14)
 	var raf = __webpack_require__(12)
-	var throttle = __webpack_require__(37)
-	var Handlebar = __webpack_require__(38)
+	var throttle = __webpack_require__(38)
+	var Handlebar = __webpack_require__(39)
 	var max = Math.max
 	var min = Math.min
 	var now = Date.now
@@ -3054,6 +3059,7 @@
 	    if (e) el.dispatchEvent(e)
 	  })
 	  opts = opts || {}
+	  this.max = opts.max || 80
 	  if (opts.handlebar) {
 	    this.handlebar = new Handlebar(el)
 	  }
@@ -3070,7 +3076,7 @@
 	 * @api private
 	 */
 	Iscroll.prototype.bind = function () {
-	  this.events = events(this.el, this)
+	  this.events = events(this.scrollable, this)
 	  this.docEvents = events(document, this)
 	
 	   // W3C touch events
@@ -3105,9 +3111,9 @@
 	}
 	
 	Iscroll.prototype.restrict = function (y) {
-	  y = min(y , 80)
+	  y = min(y , this.max)
 	  var h = Math.max(this.height, this.viewHeight)
-	  y = max(y , this.viewHeight - h - 80)
+	  y = max(y , this.viewHeight - h - this.max)
 	  return y
 	}
 	
@@ -3119,20 +3125,34 @@
 	 */
 	Iscroll.prototype.ontouchstart = function (e) {
 	  this.speed = null
-	  this.leftright = null
 	  if (this.tween) this.tween.stop()
 	  this.refresh()
-	  this.dy = 0
-	  this.ts = now()
-	  if (this.handlebar) this.resizeHandlebar()
 	
 	  var touch = this.getTouch(e)
-	  this.clientY = touch.clientY
-	  this.down = {
-	    x: touch.clientX,
-	    y: touch.clientY,
-	    start: this.y,
-	    at: now()
+	  var sx = touch.clientX
+	  var sy = touch.clientY
+	  var start = this.y
+	  this.onstart = function (x, y) {
+	    // no moved up and down, so don't know
+	    if (sy === y) return
+	    // no scroll up for less content
+	    if (this.height <= this.viewHeight && y < sy) return
+	    this.onstart = null
+	    var dx = Math.abs(x - sx)
+	    var dy = Math.abs(y - sy)
+	    // move left and right
+	    if (dx !== 0 && dx > dy) return
+	    this.clientY = touch.clientY
+	    this.dy = 0
+	    this.ts = now()
+	    this.down = {
+	      x: sx,
+	      y: sy,
+	      start: start,
+	      at: now()
+	    }
+	    if (this.handlebar) this.resizeHandlebar()
+	    return true
 	  }
 	}
 	
@@ -3143,32 +3163,23 @@
 	 * @api private
 	 */
 	Iscroll.prototype.ontouchmove = function (e) {
+	  if (!this.down && !this.onstart) return
 	  e.preventDefault()
-	  // do nothing if left right move
-	  if (e.touches.length > 1 || !this.down || this.leftright) return
 	  var touch = this.getTouch(e)
-	  var down = this.down
-	  var dy = this.dy = touch.clientY - down.y
-	  var dx = touch.clientX - down.x
-	  // can not determine
-	  if (dx === 0 && dy === 0) return
-	  // determine dy and the slope
-	  if (null == this.leftright) {
-	    // no move if contentHeight < viewHeight and move up
-	    if (this.height <= this.viewHeight && dy < 0) return
-	    var slope = dx / dy
-	    // if is greater than 1 or -1, we're swiping up/down
-	    if (slope > 1 || slope < -1) {
-	      this.leftright = true
-	      if (this.handlebar) this.hideHandlebar()
-	      return
-	    } else {
-	      this.leftright = false
-	    }
+	  var x = touch.clientX
+	  var y = touch.clientY
+	  if (this.onstart) {
+	    var started = this.onstart(x, y)
+	    if (started !== true) return
 	  }
+	  var down = this.down
+	  var dy = this.dy = y - down.y
+	
+	  // no move if contentHeight < viewHeight and move up
+	  if (this.height <= this.viewHeight && dy < 0) return
 	
 	  //calculate speed every 100 milisecond
-	  this.calcuteSpeed(touch.clientY)
+	  this.calcuteSpeed(touch.clientY, down.at)
 	  var start = this.down.start
 	  var dest = this.restrict(start + dy)
 	  this.translate(dest)
@@ -3180,10 +3191,10 @@
 	 * @param {Number} y
 	 * @api priavte
 	 */
-	Iscroll.prototype.calcuteSpeed = function (y) {
+	Iscroll.prototype.calcuteSpeed = function (y, start) {
 	  var ts = now()
 	  var dt = ts - this.ts
-	  if (ts - this.down.at < 100) {
+	  if (ts - start < 100) {
 	    this.distance = y - this.clientY
 	    this.speed = Math.abs(this.distance/dt)
 	  } else if(dt > 100){
@@ -3201,17 +3212,14 @@
 	 * @api private
 	 */
 	Iscroll.prototype.ontouchend = function (e) {
-	  if (!this.down || this.leftright) return
-	  if (this.height <= this.viewHeight && this.dy <= 0) {
-	    if(this.handlebar) this.handlebar.hide()
-	    return
-	  }
+	  if (!this.down) return
+	  var at = this.down.at
+	  this.down = null
 	  var touch = this.getTouch(e)
-	  this.calcuteSpeed(touch.clientY)
+	  this.calcuteSpeed(touch.clientY, at)
 	  var m = this.momentum()
 	  this.scrollTo(m.dest, m.duration, m.ease)
 	  this.emit('release', this.y)
-	  this.down = null
 	}
 	
 	/**
@@ -3223,22 +3231,24 @@
 	Iscroll.prototype.momentum = function () {
 	  var deceleration = 0.0004
 	  var speed = this.speed
-	  speed = min(speed, 0.8)
-	  var destination = this.y + ( speed * speed ) / ( 2 * deceleration ) * ( this.distance < 0 ? -1 : 1 )
+	  speed = min(speed, 0.6)
+	  var y = this.y
+	  var destination = y + ( speed * speed ) / ( 2 * deceleration ) * ( this.distance < 0 ? -1 : 1 )
 	  var duration = speed / deceleration
 	  var newY, ease
+	  var maxY = this.viewHeight - this.height
 	  if (destination > 0) {
 	    newY = 0
 	    ease = 'out-back'
-	  } else if (destination < this.viewHeight - this.height) {
-	    newY = this.viewHeight - this.height
+	  } else if (destination < maxY) {
+	    newY = maxY
 	    ease = 'out-back'
 	  }
 	  if (typeof newY === 'number') {
-	    duration = duration*(newY - this.y + 160)/(destination - this.y)
+	    duration = duration*(newY - y + 160)/(destination - y)
 	    destination = newY
 	  }
-	  if (this.y > 0 || this.y < this.viewHeight - this.height) {
+	  if (y > 0 || y < maxY) {
 	    duration = 500
 	    ease = 'out-circ'
 	  }
@@ -3260,10 +3270,10 @@
 	 */
 	Iscroll.prototype.scrollTo = function (y, duration, easing) {
 	  if (this.tween) this.tween.stop()
-	  var intransition = (duration > 0 && y !== this.y)
-	  if (!intransition) {
-	    this.onScrollEnd()
-	    return this.translate(y)
+	  var transition = (duration > 0 && y !== this.y)
+	  if (!transition) {
+	    this.translate(y)
+	    return this.onScrollEnd()
 	  }
 	
 	  easing = easing || 'out-cube'
@@ -3399,39 +3409,47 @@
 
 /***/ },
 /* 36 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	// DEV: We don't use var but favor parameters since these play nicer with minification
-	function computedStyle(el, prop, getComputedStyle, style) {
-	  getComputedStyle = window.getComputedStyle;
-	  style =
-	      // If we have getComputedStyle
-	      getComputedStyle ?
-	        // Query it
-	        // TODO: From CSS-Query notes, we might need (node, null) for FF
-	        getComputedStyle(el) :
+	exports.transition = __webpack_require__(37)
 	
-	      // Otherwise, we are in IE and use currentStyle
-	        el.currentStyle;
-	  if (style) {
-	    return style
-	    [
-	      // Switch to camelCase for CSSOM
-	      // DEV: Grabbed from jQuery
-	      // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
-	      // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-	      prop.replace(/-(\w)/gi, function (word, letter) {
-	        return letter.toUpperCase();
-	      })
-	    ];
-	  }
-	}
+	exports.transform = __webpack_require__(23)
 	
-	module.exports = computedStyle;
+	exports.touchAction = __webpack_require__(24)
+	
+	exports.transitionend = __webpack_require__(25)
+	
+	exports.has3d = __webpack_require__(26)
 
 
 /***/ },
 /* 37 */
+/***/ function(module, exports) {
+
+	var styles = [
+	  'webkitTransition',
+	  'MozTransition',
+	  'OTransition',
+	  'msTransition',
+	  'transition'
+	]
+	
+	var el = document.createElement('p')
+	var style
+	
+	for (var i = 0; i < styles.length; i++) {
+	  if (null != el.style[styles[i]]) {
+	    style = styles[i]
+	    break
+	  }
+	}
+	el = null
+	
+	module.exports = style
+
+
+/***/ },
+/* 38 */
 /***/ function(module, exports) {
 
 	module.exports = throttle;
@@ -3469,10 +3487,10 @@
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var detect = __webpack_require__(21)
+	var detect = __webpack_require__(36)
 	var has3d = detect.has3d
 	var transform = detect.transform
 	
@@ -3529,14 +3547,14 @@
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var autoscale = __webpack_require__(11)
 	var PI = Math.PI
 	var raf = __webpack_require__(12)
 	
-	var total = 80
+	var total = 120
 	function Loader(el) {
 	  this.el = el
 	  this.width = el.clientWidth
@@ -3546,6 +3564,19 @@
 	  canvas.height = this.height
 	  canvas.width = this.width
 	  this.ctx = canvas.getContext('2d')
+	  autoscale(canvas)
+	  this._onresize = this.resize.bind(this)
+	  window.addEventListener('orientationchange', this._onresize, false)
+	  window.addEventListener('resize', this._onresize, false)
+	}
+	
+	Loader.prototype.resize = function () {
+	  var el = this.el
+	  this.width = el.clientWidth
+	  this.height = el.clientHeight
+	  var canvas = this.canvas
+	  canvas.height = this.height
+	  canvas.width = this.width
 	  autoscale(canvas)
 	}
 	
@@ -3565,7 +3596,7 @@
 	  var ctx = this.ctx
 	  ctx.fillStyle = this.color
 	  var y = t + total
-	  var h = Math.min(40, -t)
+	  var h = Math.min(50, -t)
 	  var w = this.width
 	  var sy = y + h
 	  var d = w/20
@@ -3575,7 +3606,7 @@
 	    ctx.strokeStyle = '#ffffff'
 	  }
 	  max = max == null ? total : max
-	  if (t < - 40) {
+	  if (t < - 50) {
 	    ctx.beginPath()
 	    ctx.moveTo(0, sy)
 	    ctx.bezierCurveTo(w/4 - d, sy, w/4 +d , max, w/2, max)
@@ -3635,8 +3666,8 @@
 	    var y = self.y
 	    var p = (timestamp - start)/duration
 	    p = Math.min(p, 1)
-	    var a = p*PI*4
-	    var m = 20*(1 - p)
+	    var a = p*PI*2
+	    var m = 60*(1 - p)
 	    var max = total - m*Math.sin(a)
 	    self.drawRect(y, max)
 	    var ts = (timestamp - start)%500
