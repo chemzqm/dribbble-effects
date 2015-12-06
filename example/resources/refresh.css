@@ -46,8 +46,8 @@ ul, li {
 }
 .wrapper .ptr {
   position: absolute;
-  height: 80px;
-  top: -80px;
+  height: 120px;
+  top: -120px;
   left: 0px;
   right: 0px;
   bottom: 0px;
@@ -159,8 +159,8 @@ ul, li {
   top: 0px;
   -webkit-transition: background-color 0.2s ease-out, -webkit-transform 0.1s ease-out,width 0.1s ease-out, height 0.1s ease-out;
   transition: background-color 0.2s ease-out, transform 0.1s ease-out,width 0.1s ease-out, height 0.1s ease-out;
-  width: 4px;
-  border-radius: 2px;
+  width: 2px;
+  border-radius: 1px;
   background-color: rgba(0, 0, 0, 0);
   z-index: 9999;
   height: 0px;

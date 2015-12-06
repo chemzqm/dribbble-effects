@@ -34,7 +34,7 @@
     "component-uid": "0.0.2",
     "domify": "^1.4.0",
     "es6-promise-polyfill": "^1.1.1",
-    "iscroll-component": "^1.1.9",
+    "iscroll-component": "^1.1.10",
     "prop-detect": "^1.0.0",
     "scrollfix": "0.0.2",
     "swipe-it": "^0.1.18"
