@@ -1,0 +1,191 @@
+body {
+  padding: 0px;
+  margin: 0px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+header {
+  padding: 0;
+  line-height: 35px;
+  font-size: 15px;
+  text-align: center;
+  position: relative;
+  font-weight: 500;
+  font-family: helvetica;
+  border-bottom: 1px solid #eee;
+}
+header .plus {
+  position: absolute;
+  display: block;
+  top: 0px;
+  right: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  font-family: arial, helvetica, Segoe UI Symbol;
+  color: #1ea3e7;
+}
+ul, li {
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+}
+.scrollable {
+  position: fixed;
+  top: 36px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+.scrollable > .wrapper {
+  position: relative;
+}
+.wrapper .ptr {
+  position: absolute;
+  height: 80px;
+  top: -80px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+.projects {
+  padding: 10px;
+}
+.projects .content {
+  height: 160px;
+}
+.projects li {
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+.projects li .content{
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: end;
+  -webkit-align-items: flex-end;
+  -ms-flex-align: end;
+  align-items: flex-end;
+}
+.projects li .content .img{
+  width: 130px;
+  margin: 0 auto;
+  height: 140px;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  -webkit-background-size: cover;
+  background-size: cover;
+}
+.projects > li.one .content {
+  background-color:#1ea3e7;
+}
+.projects > li.two .content {
+  background-color:#ffcb57;
+}
+.projects > li.three .content {
+  background-color:#A395CE;
+}
+.projects > li.four .content {
+  background-color:#d1adaf;
+}
+.projects > li.one .img {
+  background-image: url('./img/jichi.png')
+}
+.projects > li.two .img {
+  background-image: url('./img/paigu.png')
+}
+.projects > li.three .img {
+  background-image: url('./img/hongshaorou.png')
+}
+.projects > li.four .img {
+  background-image: url('./img/niurou.png')
+}
+.projects li .title {
+  line-height: 1.5;
+  padding: 5px;
+  font-size: 14px;
+  font-family: "AvenirNextLTPro-Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-transition: all 0.35s ease-out;
+  transition: all 0.35s ease-out;
+  -webkit-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
+  height: 31px;
+}
+.projects li .remove {
+  width: 60px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+.projects li .title.remove {
+  -webkit-transform: rotateX(90deg);
+  -ms-transform: rotateX(90deg);
+  transform: rotateX(90deg)
+}
+.projects li .remove .trash{
+  background-color: #FF5C1D;
+  border-radius: 50%;
+  color: #fff;
+  height: 25px;
+  width: 25px;
+  background-position: center;
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KPHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTQgMTB2MjBjMCAxLjEgMC45IDIgMiAyaDE4YzEuMSAwIDItMC45IDItMnYtMjBoLTIyek0xMCAyOGgtMnYtMTRoMnYxNHpNMTQgMjhoLTJ2LTE0aDJ2MTR6TTE4IDI4aC0ydi0xNGgydjE0ek0yMiAyOGgtMnYtMTRoMnYxNHoiPjwvcGF0aD4KPHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTI2LjUgNGgtNi41di0yLjVjMC0wLjgyNS0wLjY3NS0xLjUtMS41LTEuNWgtN2MtMC44MjUgMC0xLjUgMC42NzUtMS41IDEuNXYyLjVoLTYuNWMtMC44MjUgMC0xLjUgMC42NzUtMS41IDEuNXYyLjVoMjZ2LTIuNWMwLTAuODI1LTAuNjc1LTEuNS0xLjUtMS41ek0xOCA0aC02di0xLjk3NWg2djEuOTc1eiI+PC9wYXRoPgo8L3N2Zz4K');
+  background-repeat: no-repeat;
+  -webkit-background-size: 50% 50%;
+  background-size: 50% 50%;
+  -webkit-animation: bigger 0.2s ease-out;
+  animation: bigger 0.2s ease-out;
+}
+.iscroll-handlebar {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  -webkit-transition: background-color 0.2s ease-out, -webkit-transform 0.1s ease-out,width 0.1s ease-out, height 0.1s ease-out;
+  transition: background-color 0.2s ease-out, transform 0.1s ease-out,width 0.1s ease-out, height 0.1s ease-out;
+  width: 4px;
+  border-radius: 2px;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 9999;
+  height: 0px;
+}
+
+
+@-webkit-keyframes bigger {
+  from {
+    -webkit-transform: scale(0.5);
+    transform: scale(0.5)
+  }
+  to {
+    -webkit-transform: scale(1);
+    transform: scale(1)
+  }
+}
+
+
+@keyframes bigger {
+  from {
+    -webkit-transform: scale(0.5);
+    transform: scale(0.5)
+  }
+  to {
+    -webkit-transform: scale(1);
+    transform: scale(1)
+  }
+}
