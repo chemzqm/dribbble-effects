@@ -25,6 +25,7 @@ Deom 链接： https://chemzqm.github.io/dribbble-effects/refresh.html
 * 删除图标背景是 svg，部分浏览器不支持 svg 做为图片背景
 * 下拉刷新的效果是 canvas 加 requestAnimationFrame 实现的，因为控制最灵活
 * 删除图标动画是 css animation，因为实现简单
+* 代码没有注释，抽象也或许不太合理，仅供参考
 
 
 ## 第一个 Epic-Black-Friday-Deals
