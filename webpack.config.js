@@ -2,7 +2,8 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin')
 
 module.exports = {
   entry: {
-    friday: './example/friday.js'
+    friday: './example/friday.js',
+    refresh: './example/refresh.js'
   },
   output: {
     path: 'example/resources',

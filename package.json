@@ -26,20 +26,27 @@
   "dependencies": {
     "autoscale-canvas": "0.0.3",
     "component-emitter": "^1.2.0",
+    "component-event": "^0.1.4",
     "component-events": "^1.0.9",
     "component-raf": "^1.2.0",
     "component-tap-event": "^1.1.0",
     "component-tween": "^1.2.0",
+    "component-uid": "0.0.2",
     "domify": "^1.4.0",
     "es6-promise-polyfill": "^1.1.1",
+    "iscroll-component": "^1.1.8",
     "prop-detect": "^1.0.0",
-    "scrollfix": "0.0.2"
+    "scrollfix": "0.0.2",
+    "swipe-it": "^0.1.18"
   },
   "browser": {
     "raf": "component-raf",
     "events": "component-events",
     "tween": "component-tween",
     "emitter": "component-emitter",
-    "tap-event": "component-tap-event"
+    "tap-event": "component-tap-event",
+    "uid": "component-uid",
+    "iscroll": "iscroll-component",
+    "event": "component-event"
   }
 }
