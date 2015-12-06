@@ -3548,6 +3548,19 @@
 	  canvas.width = this.width
 	  this.ctx = canvas.getContext('2d')
 	  autoscale(canvas)
+	  this._onresize = this.resize.bind(this)
+	  window.addEventListener('orientationchange', this._onresize, false)
+	  window.addEventListener('resize', this._onresize, false)
+	}
+	
+	Loader.prototype.resize = function () {
+	  var el = this.el
+	  this.width = el.clientWidth
+	  this.height = el.clientHeight
+	  var canvas = this.canvas
+	  canvas.height = this.height
+	  canvas.width = this.width
+	  autoscale(canvas)
 	}
 	
 	Loader.prototype.setColor = function (color) {
