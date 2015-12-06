@@ -3054,6 +3054,7 @@
 	    if (e) el.dispatchEvent(e)
 	  })
 	  opts = opts || {}
+	  this.max = opts.max || 80
 	  if (opts.handlebar) {
 	    this.handlebar = new Handlebar(el)
 	  }
@@ -3105,9 +3106,9 @@
 	}
 	
 	Iscroll.prototype.restrict = function (y) {
-	  y = min(y , 80)
+	  y = min(y , this.max)
 	  var h = Math.max(this.height, this.viewHeight)
-	  y = max(y , this.viewHeight - h - 80)
+	  y = max(y , this.viewHeight - h - this.max)
 	  return y
 	}
 	

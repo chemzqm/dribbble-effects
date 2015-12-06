@@ -26,6 +26,7 @@ Deom 链接： https://chemzqm.github.io/dribbble-effects/refresh.html
 * 下拉刷新的效果是 canvas 加 requestAnimationFrame 实现的，因为控制最灵活
 * 删除图标动画是 css animation，因为实现简单
 * 代码没有注释，抽象也或许不太合理，仅供参考
+* 图片是从美食应用截取的，组您开胃😋
 
 
 ## 第一个 Epic-Black-Friday-Deals
