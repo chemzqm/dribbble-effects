@@ -2936,11 +2936,14 @@
 	  loader.setColor('#1ea3e7')
 	  var stat
 	  is.on('scroll', function (y) {
+	    if (y > 10) return
 	    if (stat == null) {
 	      var el = scrollable.querySelector('.projects > li:first-child .content')
 	      if (el) {
 	        var color = getComputedStyle(el)['background-color']
 	        loader.setColor(color)
+	      } else {
+	        loader.setColor('#1ea3e7')
 	      }
 	      loader.draw(y)
 	    }
