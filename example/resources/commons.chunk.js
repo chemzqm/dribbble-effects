@@ -2938,8 +2938,10 @@
 	  is.on('scroll', function (y) {
 	    if (stat == null) {
 	      var el = scrollable.querySelector('.projects > li:first-child .content')
-	      var color = getComputedStyle(el)['background-color']
-	      loader.setColor(color)
+	      if (el) {
+	        var color = getComputedStyle(el)['background-color']
+	        loader.setColor(color)
+	      }
 	      loader.draw(y)
 	    }
 	    loader.y = y
