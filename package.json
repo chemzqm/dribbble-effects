@@ -14,7 +14,7 @@
     "file-loader": "^0.8.5",
     "growl": "^1.8.1",
     "gulp": "^3.9.0",
-    "gulp-live-serve": "^1.0.1",
+    "gulp-live-serve": "^1.0.2",
     "gulp-livereload": "^3.8.1",
     "gulp-util": "^3.0.7",
     "html-loader": "^0.4.0",
