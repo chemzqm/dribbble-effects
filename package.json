@@ -17,7 +17,7 @@
     "gulp-live-serve": "^1.0.1",
     "gulp-livereload": "^3.8.1",
     "gulp-util": "^3.0.7",
-    "html-loader": "^0.4.0",
+    "html-loader": "^0.4.3",
     "json-loader": "^0.5.4",
     "style-loader": "^0.13.0",
     "url-loader": "^0.5.7",
