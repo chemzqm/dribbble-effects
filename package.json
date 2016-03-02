@@ -37,7 +37,7 @@
     "iscroll-component": "^1.1.10",
     "prop-detect": "^1.0.0",
     "scrollfix": "0.0.2",
-    "swipe-it": "^0.1.18"
+    "swipe-it": "^0.1.19"
   },
   "browser": {
     "raf": "component-raf",
