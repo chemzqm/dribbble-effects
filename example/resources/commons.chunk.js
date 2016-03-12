@@ -22,48 +22,48 @@
 /******/ 			return __webpack_require__(0);
 /******/ 		}
 /******/ 	};
-/******/
+
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// object to store loaded and loading chunks
 /******/ 	// "0" means "already loaded"
 /******/ 	// Array means "loading", array contains callbacks
 /******/ 	var installedChunks = {
 /******/ 		2:0
 /******/ 	};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
+
 /******/ 	// This file contains only the entry chunk.
 /******/ 	// The chunk loading function for additional chunks
 /******/ 	__webpack_require__.e = function requireEnsure(chunkId, callback) {
 /******/ 		// "0" is the signal for "already loaded"
 /******/ 		if(installedChunks[chunkId] === 0)
 /******/ 			return callback.call(null, __webpack_require__);
-/******/
+
 /******/ 		// an array means "currently loading".
 /******/ 		if(installedChunks[chunkId] !== undefined) {
 /******/ 			installedChunks[chunkId].push(callback);
@@ -75,18 +75,18 @@
 /******/ 			script.type = 'text/javascript';
 /******/ 			script.charset = 'utf-8';
 /******/ 			script.async = true;
-/******/
+
 /******/ 			script.src = __webpack_require__.p + "" + chunkId + "." + ({"0":"friday","1":"refresh"}[chunkId]||chunkId) + ".bundle.js";
 /******/ 			head.appendChild(script);
 /******/ 		}
 /******/ 	};
-/******/
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/ })
@@ -97,11 +97,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, setImmediate) {(function(global){
-	
+
 	//
 	// Check for native Promise and it has correct interface
 	//
-	
+
 	var NativePromise = global['Promise'];
 	var nativePromiseSupported =
 	  NativePromise &&
@@ -118,12 +118,12 @@
 	    new NativePromise(function(r){ resolve = r; });
 	    return typeof resolve === 'function';
 	  })();
-	
-	
+
+
 	//
 	// export if necessary
 	//
-	
+
 	if (typeof exports !== 'undefined' && exports)
 	{
 	  // node.js
@@ -145,67 +145,67 @@
 	      global['Promise'] = Promise;
 	  }
 	}
-	
-	
+
+
 	//
 	// Polyfill
 	//
-	
+
 	var PENDING = 'pending';
 	var SEALED = 'sealed';
 	var FULFILLED = 'fulfilled';
 	var REJECTED = 'rejected';
 	var NOOP = function(){};
-	
+
 	// async calls
 	var asyncSetTimer = typeof setImmediate !== 'undefined' ? setImmediate : setTimeout;
 	var asyncQueue = [];
 	var asyncTimer;
-	
+
 	function asyncFlush(){
 	  // run promise callbacks
 	  for (var i = 0; i < asyncQueue.length; i++)
 	    asyncQueue[i][0](asyncQueue[i][1]);
-	
+
 	  // reset async asyncQueue
 	  asyncQueue = [];
 	  asyncTimer = false;
 	}
-	
+
 	function asyncCall(callback, arg){
 	  asyncQueue.push([callback, arg]);
-	
+
 	  if (!asyncTimer)
 	  {
 	    asyncTimer = true;
 	    asyncSetTimer(asyncFlush, 0);
 	  }
 	}
-	
-	
+
+
 	function invokeResolver(resolver, promise) {
 	  function resolvePromise(value) {
 	    resolve(promise, value);
 	  }
-	
+
 	  function rejectPromise(reason) {
 	    reject(promise, reason);
 	  }
-	
+
 	  try {
 	    resolver(resolvePromise, rejectPromise);
 	  } catch(e) {
 	    rejectPromise(e);
 	  }
 	}
-	
+
 	function invokeCallback(subscriber){
 	  var owner = subscriber.owner;
 	  var settled = owner.state_;
 	  var value = owner.data_;  
 	  var callback = subscriber[settled];
 	  var promise = subscriber.then;
-	
+
 	  if (typeof callback === 'function')
 	  {
 	    settled = FULFILLED;
@@ -215,35 +215,35 @@
 	      reject(promise, e);
 	    }
 	  }
-	
+
 	  if (!handleThenable(promise, value))
 	  {
 	    if (settled === FULFILLED)
 	      resolve(promise, value);
-	
+
 	    if (settled === REJECTED)
 	      reject(promise, value);
 	  }
 	}
-	
+
 	function handleThenable(promise, value) {
 	  var resolved;
-	
+
 	  try {
 	    if (promise === value)
 	      throw new TypeError('A promises callback cannot return that same promise.');
-	
+
 	    if (value && (typeof value === 'function' || typeof value === 'object'))
 	    {
 	      var then = value.then;  // then should be retrived only once
-	
+
 	      if (typeof then === 'function')
 	      {
 	        then.call(value, function(val){
 	          if (!resolved)
 	          {
 	            resolved = true;
-	
+
 	            if (value !== val)
 	              resolve(promise, val);
 	            else
@@ -253,85 +253,85 @@
 	          if (!resolved)
 	          {
 	            resolved = true;
-	
+
 	            reject(promise, reason);
 	          }
 	        });
-	
+
 	        return true;
 	      }
 	    }
 	  } catch (e) {
 	    if (!resolved)
 	      reject(promise, e);
-	
+
 	    return true;
 	  }
-	
+
 	  return false;
 	}
-	
+
 	function resolve(promise, value){
 	  if (promise === value || !handleThenable(promise, value))
 	    fulfill(promise, value);
 	}
-	
+
 	function fulfill(promise, value){
 	  if (promise.state_ === PENDING)
 	  {
 	    promise.state_ = SEALED;
 	    promise.data_ = value;
-	
+
 	    asyncCall(publishFulfillment, promise);
 	  }
 	}
-	
+
 	function reject(promise, reason){
 	  if (promise.state_ === PENDING)
 	  {
 	    promise.state_ = SEALED;
 	    promise.data_ = reason;
-	
+
 	    asyncCall(publishRejection, promise);
 	  }
 	}
-	
+
 	function publish(promise) {
 	  promise.then_ = promise.then_.forEach(invokeCallback);
 	}
-	
+
 	function publishFulfillment(promise){
 	  promise.state_ = FULFILLED;
 	  publish(promise);
 	}
-	
+
 	function publishRejection(promise){
 	  promise.state_ = REJECTED;
 	  publish(promise);
 	}
-	
+
 	/**
 	* @class
 	*/
 	function Promise(resolver){
 	  if (typeof resolver !== 'function')
 	    throw new TypeError('Promise constructor takes a function argument');
-	
+
 	  if (this instanceof Promise === false)
 	    throw new TypeError('Failed to construct \'Promise\': Please use the \'new\' operator, this object constructor cannot be called as a function.');
-	
+
 	  this.then_ = [];
-	
+
 	  invokeResolver(resolver, this);
 	}
-	
+
 	Promise.prototype = {
 	  constructor: Promise,
-	
+
 	  state_: PENDING,
 	  then_: null,
 	  data_: undefined,
-	
+
 	  then: function(onFulfillment, onRejection){
 	    var subscriber = {
 	      owner: this,
@@ -339,7 +339,7 @@
 	      fulfilled: onFulfillment,
 	      rejected: onRejection
 	    };
-	
+
 	    if (this.state_ === FULFILLED || this.state_ === REJECTED)
 	    {
 	      // already resolved, call callback async
@@ -350,25 +350,25 @@
 	      // subscribe
 	      this.then_.push(subscriber);
 	    }
-	
+
 	    return subscriber.then;
 	  },
-	
+
 	  'catch': function(onRejection) {
 	    return this.then(null, onRejection);
 	  }
 	};
-	
+
 	Promise.all = function(promises){
 	  var Class = this;
-	
+
 	  if (!Array.isArray(promises))
 	    throw new TypeError('You must pass an array to Promise.all().');
-	
+
 	  return new Class(function(resolve, reject){
 	    var results = [];
 	    var remaining = 0;
-	
+
 	    function resolver(index){
 	      remaining++;
 	      return function(value){
@@ -377,33 +377,33 @@
 	          resolve(results);
 	      };
 	    }
-	
+
 	    for (var i = 0, promise; i < promises.length; i++)
 	    {
 	      promise = promises[i];
-	
+
 	      if (promise && typeof promise.then === 'function')
 	        promise.then(resolver(i), reject);
 	      else
 	        results[i] = promise;
 	    }
-	
+
 	    if (!remaining)
 	      resolve(results);
 	  });
 	};
-	
+
 	Promise.race = function(promises){
 	  var Class = this;
-	
+
 	  if (!Array.isArray(promises))
 	    throw new TypeError('You must pass an array to Promise.race().');
-	
+
 	  return new Class(function(resolve, reject) {
 	    for (var i = 0, promise; i < promises.length; i++)
 	    {
 	      promise = promises[i];
-	
+
 	      if (promise && typeof promise.then === 'function')
 	        promise.then(resolve, reject);
 	      else
@@ -411,28 +411,28 @@
 	    }
 	  });
 	};
-	
+
 	Promise.resolve = function(value){
 	  var Class = this;
-	
+
 	  if (value && typeof value === 'object' && value.constructor === Class)
 	    return value;
-	
+
 	  return new Class(function(resolve){
 	    resolve(value);
 	  });
 	};
-	
+
 	Promise.reject = function(reason){
 	  var Class = this;
-	
+
 	  return new Class(function(resolve, reject){
 	    reject(reason);
 	  });
 	};
-	
+
 	})(typeof window != 'undefined' ? window : typeof global != 'undefined' ? global : typeof self != 'undefined' ? self : this);
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(2).setImmediate))
 
 /***/ },
@@ -444,9 +444,9 @@
 	var slice = Array.prototype.slice;
 	var immediateIds = {};
 	var nextImmediateId = 0;
-	
+
 	// DOM APIs, for completeness
-	
+
 	exports.setTimeout = function() {
 	  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
 	};
@@ -455,7 +455,7 @@
 	};
 	exports.clearTimeout =
 	exports.clearInterval = function(timeout) { timeout.close(); };
-	
+
 	function Timeout(id, clearFn) {
 	  this._id = id;
 	  this._clearFn = clearFn;
@@ -464,21 +464,21 @@
 	Timeout.prototype.close = function() {
 	  this._clearFn.call(window, this._id);
 	};
-	
+
 	// Does not start the time, just sets up the members needed.
 	exports.enroll = function(item, msecs) {
 	  clearTimeout(item._idleTimeoutId);
 	  item._idleTimeout = msecs;
 	};
-	
+
 	exports.unenroll = function(item) {
 	  clearTimeout(item._idleTimeoutId);
 	  item._idleTimeout = -1;
 	};
-	
+
 	exports._unrefActive = exports.active = function(item) {
 	  clearTimeout(item._idleTimeoutId);
-	
+
 	  var msecs = item._idleTimeout;
 	  if (msecs >= 0) {
 	    item._idleTimeoutId = setTimeout(function onTimeout() {
@@ -487,14 +487,14 @@
 	    }, msecs);
 	  }
 	};
-	
+
 	// That's not how node.js implements it but the exposed api is the same.
 	exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
 	  var id = nextImmediateId++;
 	  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
-	
+
 	  immediateIds[id] = true;
-	
+
 	  nextTick(function onNextTick() {
 	    if (immediateIds[id]) {
 	      // fn.call() is faster so we optimize for the common use-case
@@ -508,10 +508,10 @@
 	      exports.clearImmediate(id);
 	    }
 	  });
-	
+
 	  return id;
 	};
-	
+
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
@@ -522,13 +522,13 @@
 /***/ function(module, exports) {
 
 	// shim for using process in browser
-	
+
 	var process = module.exports = {};
 	var queue = [];
 	var draining = false;
 	var currentQueue;
 	var queueIndex = -1;
-	
+
 	function cleanUpNextTick() {
 	    draining = false;
 	    if (currentQueue.length) {
@@ -540,14 +540,14 @@
 	        drainQueue();
 	    }
 	}
-	
+
 	function drainQueue() {
 	    if (draining) {
 	        return;
 	    }
 	    var timeout = setTimeout(cleanUpNextTick);
 	    draining = true;
-	
+
 	    var len = queue.length;
 	    while(len) {
 	        currentQueue = queue;
@@ -564,7 +564,7 @@
 	    draining = false;
 	    clearTimeout(timeout);
 	}
-	
+
 	process.nextTick = function (fun) {
 	    var args = new Array(arguments.length - 1);
 	    if (arguments.length > 1) {
@@ -577,7 +577,7 @@
 	        setTimeout(drainQueue, 0);
 	    }
 	};
-	
+
 	// v8 likes predictible objects
 	function Item(fun, array) {
 	    this.fun = fun;
@@ -592,9 +592,9 @@
 	process.argv = [];
 	process.version = ''; // empty string to avoid regexp issues
 	process.versions = {};
-	
+
 	function noop() {}
-	
+
 	process.on = noop;
 	process.addListener = noop;
 	process.once = noop;
@@ -602,11 +602,11 @@
 	process.removeListener = noop;
 	process.removeAllListeners = noop;
 	process.emit = noop;
-	
+
 	process.binding = function (name) {
 	    throw new Error('process.binding is not supported');
 	};
-	
+
 	process.cwd = function () { return '/' };
 	process.chdir = function (dir) {
 	    throw new Error('process.chdir is not supported');
@@ -634,7 +634,7 @@
 	var raf = __webpack_require__(12)
 	var Footer = __webpack_require__(13)
 	var Emitter = __webpack_require__(15)
-	
+
 	function View(el, dateEl) {
 	  this.el = el
 	  // text height
@@ -673,9 +673,9 @@
 	  // select yesterday
 	  footer.select(1)
 	}
-	
+
 	Emitter(View.prototype)
-	
+
 	View.prototype.wait = function (n) {
 	  var self = this
 	  var promise = this.promise = new Promise(function (resolve, reject) {
@@ -694,32 +694,32 @@
 	  })
 	  return promise
 	}
-	
+
 	View.prototype.draw = function () {
 	  this.circle.draw()
 	  this.icon.draw()
 	  this.time.draw()
 	}
-	
+
 	View.prototype.pend = function () {
 	  this.duration = 3300
 	  this.stat = 'pending'
 	  return this.animate()
 	}
-	
+
 	View.prototype.check = function () {
 	  this.duration = 800
 	  this.stat = 'checking'
 	  var promise = this.animate()
 	  return promise
 	}
-	
+
 	View.prototype.reset = function () {
 	  this.duration = 500
 	  this.stat = 'reseting'
 	  return this.animate()
 	}
-	
+
 	View.prototype.animate = function () {
 	  var duration = this.duration
 	  var start
@@ -746,7 +746,7 @@
 	  })
 	  return promise
 	}
-	
+
 	View.prototype.cancel = function () {
 	  this.emit('cancel')
 	  this.promise = this.promise || Promise.resolve(null)
@@ -758,15 +758,15 @@
 	    self.canceled = false
 	  })
 	}
-	
+
 	View.prototype.next = function () {
 	  return this.footer.next()
 	}
-	
+
 	View.prototype.prev = function () {
 	  return this.footer.prev()
 	}
-	
+
 	module.exports = View
 
 
@@ -782,7 +782,7 @@
 	var step_len = steps.length
 	var Tail = __webpack_require__(8)
 	var width = 5
-	
+
 	function Circle(view) {
 	  this.view = view
 	  this.ctx = view.ctx
@@ -796,7 +796,7 @@
 	  this.gray = util.toRgba(gray, 0.1)
 	  this.tails = []
 	}
-	
+
 	Circle.prototype.draw = function () {
 	  var stat = this.view.stat
 	  // gray circle
@@ -815,7 +815,7 @@
 	  }
 	  ctx.restore()
 	}
-	
+
 	Circle.prototype.pend = function () {
 	  var ctx = this.ctx
 	  var percent = this.view.percent
@@ -835,7 +835,7 @@
 	    tail.draw(p)
 	  })
 	}
-	
+
 	Circle.prototype.reset = function () {
 	  var ctx = this.ctx
 	  var p = this.view.percent
@@ -847,7 +847,7 @@
 	  ctx.arc(this.x, this.y, this.r, s, e)
 	  ctx.stroke()
 	}
-	
+
 	Circle.prototype.createTails = function () {
 	  var n = this.step
 	  var num = steps[n]
@@ -858,7 +858,7 @@
 	  }
 	  this.tails = tails
 	}
-	
+
 	module.exports = Circle
 
 
@@ -874,12 +874,12 @@
 	      b: parseInt(result[3], 16)
 	  } : null;
 	}
-	
+
 	exports.toRgba = function (hex, alpha) {
 	  var rgb = toRgb(hex)
 	  return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ','  + alpha + ')'
 	}
-	
+
 	exports.drawRoundRect = function (ctx, x, y , w, h, r) {
 	  ctx.beginPath();
 	  ctx.moveTo(x + r, y);
@@ -902,9 +902,9 @@
 	var gap = Math.PI*1/180
 	// 5 degree
 	var total = 2*Math.PI/180
-	
+
 	var width = 5
-	
+
 	/**
 	 * Tail
 	 *
@@ -919,7 +919,7 @@
 	  this.y = circle.y
 	  this.r = circle.r
 	}
-	
+
 	Tail.prototype.draw = function (percent) {
 	  var w = width*(1 - percent)
 	  var i = this.index
@@ -932,7 +932,7 @@
 	  ctx.arc(this.x, this.y, this.r, s, e)
 	  ctx.stroke()
 	}
-	
+
 	module.exports = Tail
 
 
@@ -947,7 +947,7 @@
 	var yellow = '#F3DD70'
 	var bgColor = '#171616'
 	var PI = Math.PI
-	
+
 	function Icon(view) {
 	  this.view = view
 	  this.ctx = view.ctx
@@ -956,7 +956,7 @@
 	  this.x = view.width/2
 	  this.y = h/2 - 20
 	}
-	
+
 	Icon.prototype.draw = function () {
 	  var stat = this.view.stat
 	  var ctx = this.ctx
@@ -972,7 +972,7 @@
 	    this.content(0)
 	  }
 	}
-	
+
 	Icon.prototype.rect = function (r) {
 	  var ctx = this.ctx
 	  var x = this.x - width/2
@@ -980,7 +980,7 @@
 	  util.drawRoundRect(ctx, x, y, width, height, r)
 	  ctx.stroke()
 	}
-	
+
 	Icon.prototype.content = function (translateX, opacity) {
 	  var ctx = this.ctx
 	  translateX = translateX || 0
@@ -1008,7 +1008,7 @@
 	  // reset transform
 	  ctx.setTransform(window.devicePixelRatio || 1 ,0 ,0 ,window.devicePixelRatio || 1 ,0, 0);
 	}
-	
+
 	Icon.prototype.check = function (percent) {
 	  var r = 2 + (width/2 - 2)*percent
 	  if (percent === 1) {
@@ -1033,13 +1033,13 @@
 	    this.drawCorrect(p)
 	  }
 	}
-	
+
 	Icon.prototype.mask = function (x, y) {
 	  var ctx = this.ctx
 	  ctx.fillStyle = bgColor
 	  ctx.fillRect(x, y, width, height)
 	}
-	
+
 	Icon.prototype.drawCorrect = function (p, tx) {
 	  var l = 14
 	  var tl = 2.618*l
@@ -1066,7 +1066,7 @@
 	  ctx.stroke()
 	  ctx.setTransform(window.devicePixelRatio || 1 ,0 ,0 ,window.devicePixelRatio || 1 ,0, 0);
 	}
-	
+
 	Icon.prototype.reset = function (percent) {
 	  var ctx = this.ctx
 	  var m = 0.4
@@ -1100,13 +1100,13 @@
 	    this.mask(mx, my)
 	  }
 	}
-	
-	
+
+
 	function outBack(n){
 	  var s = 1.70158;
 	  return --n * n * ((s + 1) * n + s) + 1;
 	}
-	
+
 	module.exports = Icon
 
 
@@ -1119,7 +1119,7 @@
 	// second
 	var total = 24*60*60
 	var util = __webpack_require__(7)
-	
+
 	function Time(view) {
 	  this.view = view
 	  this.ctx = view.ctx
@@ -1131,7 +1131,7 @@
 	  this.white = util.toRgba(white, 1)
 	  this.gray = util.toRgba(gray, 0.8)
 	}
-	
+
 	Time.prototype.draw = function () {
 	  var ctx = this.ctx
 	  var percent = this.view.percent
@@ -1149,7 +1149,7 @@
 	  ctx.fillText('UNTIL NEXT DIGEST', this.x ,y)
 	  ctx.restore()
 	}
-	
+
 	Time.prototype.getHMS = function (stat, percent) {
 	  if (stat === 'pending') {
 	    var n = total*(1 - percent)
@@ -1167,11 +1167,11 @@
 	    return { h: h, m: m, s: s}
 	  }
 	}
-	
+
 	function pad(n) {
 	  return ('0' + String(n)).slice(-2)
 	}
-	
+
 	function toHMS(n) {
 	  var h = Math.floor(n/3600)
 	  var m = Math.floor((n - h*3600)/60)
@@ -1197,7 +1197,7 @@
 	 * @return {Canvas}
 	 * @api public
 	 */
-	
+
 	module.exports = function(canvas){
 	  var ctx = canvas.getContext('2d');
 	  var ratio = window.devicePixelRatio || 1;
@@ -1218,16 +1218,16 @@
 	/**
 	 * Expose `requestAnimationFrame()`.
 	 */
-	
+
 	exports = module.exports = window.requestAnimationFrame
 	  || window.webkitRequestAnimationFrame
 	  || window.mozRequestAnimationFrame
 	  || fallback;
-	
+
 	/**
 	 * Fallback implementation.
 	 */
-	
+
 	var prev = new Date().getTime();
 	function fallback(fn) {
 	  var curr = new Date().getTime();
@@ -1236,16 +1236,16 @@
 	  prev = curr;
 	  return req;
 	}
-	
+
 	/**
 	 * Cancel.
 	 */
-	
+
 	var cancel = window.cancelAnimationFrame
 	  || window.webkitCancelAnimationFrame
 	  || window.mozCancelAnimationFrame
 	  || window.clearTimeout;
-	
+
 	exports.cancel = function(id){
 	  cancel.call(window, id);
 	};
@@ -1266,7 +1266,7 @@
 	var transform = detect.transform
 	var Emitter = __webpack_require__(15)
 	var tap = __webpack_require__(33)
-	
+
 	function createDates(n) {
 	  var oneday = 24*3600*1000
 	  var dates = []
@@ -1283,12 +1283,12 @@
 	  }
 	  return dates
 	}
-	
+
 	// item width
 	var width = 90
-	
+
 	var hastouch = 'ontouchstart' in window
-	
+
 	function Footer(el) {
 	  this.el = el
 	  var container = el.parentNode
@@ -1320,9 +1320,9 @@
 	  this.docEvents.bind('touchend')
 	  this.docEvents.bind('mouseup', 'ontouchend')
 	}
-	
+
 	Emitter(Footer.prototype)
-	
+
 	/**
 	 * select without animation
 	 *
@@ -1335,7 +1335,7 @@
 	  var x = - ((this.total - this.count - num)*width)
 	  this.translate(x)
 	}
-	
+
 	Footer.prototype.active = function (index) {
 	  if (this.actived && this.actived === index) return
 	  if (this.tween) this.tween.stop()
@@ -1351,7 +1351,7 @@
 	  }
 	  this.actived = index
 	}
-	
+
 	Footer.prototype.translate = function (x) {
 	  var s = this.el.style
 	  if (has3d) {
@@ -1359,10 +1359,10 @@
 	  } else {
 	    s[transform] = 'translateX(' + x + 'px)'
 	  }
-	
+
 	  this.x = x
 	}
-	
+
 	Footer.prototype.next = function () {
 	  var n = this.actived + 1
 	  if (n >= this.total) return
@@ -1370,7 +1370,7 @@
 	  var x = this.x - width
 	  return this.animate(x)
 	}
-	
+
 	Footer.prototype.prev = function () {
 	  var n = this.actived - 1
 	  if (n >= this.total) return
@@ -1378,7 +1378,7 @@
 	  var x = this.x + width
 	  return this.animate(x)
 	}
-	
+
 	Footer.prototype.animate = function (x, ease, duration) {
 	  ease = ease || 'out-quad'
 	  duration = duration || 300
@@ -1386,12 +1386,12 @@
 	  .ease(ease)
 	  .to({x : x})
 	  .duration(duration)
-	
+
 	  var self = this
 	  tween.update(function(o){
 	    self.translate(o.x)
 	  })
-	
+
 	  var promise = new Promise(function (resolve, reject) {
 	    var rejected
 	    tween.on('stop', function () {
@@ -1404,16 +1404,16 @@
 	      if (!rejected) resolve()
 	    })
 	  })
-	
+
 	  function animate() {
 	    raf(animate)
 	    tween.update()
 	  }
-	
+
 	  animate()
 	  return promise
 	}
-	
+
 	Footer.prototype.onclick = function (e) {
 	  var li = e.delegateTarget
 	  var children = this.el.children
@@ -1426,9 +1426,9 @@
 	  }
 	  this.active(index)
 	}
-	
+
 	Footer.prototype.ontap = tap(Footer.prototype.onclick)
-	
+
 	Footer.prototype.ontouchstart = function (e) {
 	  if (this.tween) this.tween.stop()
 	  var touch = this.getTouch(e)
@@ -1444,7 +1444,7 @@
 	    at: this.ts
 	  }
 	}
-	
+
 	Footer.prototype.ontouchmove = function (e) {
 	  if (!this.down) return
 	  if (this.tween) this.tween.stop()
@@ -1454,13 +1454,13 @@
 	  if (!this.pageX) this.pageX = touch.pageX
 	  //calculate speed every 100 milisecond
 	  this.calcuteSpeed(touch.pageX)
-	
+
 	  var x = this.sx + dx
 	  x = Math.min(width/3, x)
 	  x = Math.max(x, - (this.total - this.count)*width - width/3)
 	  this.translate(x)
 	}
-	
+
 	Footer.prototype.ontouchend = function (e) {
 	  if (!this.down) return
 	  var touch = this.getTouch(e)
@@ -1474,14 +1474,14 @@
 	  this.animate(m.x, m.ease, m.duration).catch(function () {
 	  })
 	}
-	
+
 	Footer.prototype.getTouch = function (e) {
 	  if (e.changedTouches && e.changedTouches.length > 0) {
 	    return e.changedTouches[0]
 	  }
 	  return e
 	}
-	
+
 	Footer.prototype.momentum = function () {
 	  var deceleration = 0.0004
 	  var speed = this.speed
@@ -1515,8 +1515,8 @@
 	    ease: ease
 	  }
 	}
-	
-	
+
+
 	Footer.prototype.calcuteSpeed = function (x) {
 	  var ts = Date.now()
 	  var dt = ts - this.ts
@@ -1530,7 +1530,7 @@
 	    this.pageX = x
 	  }
 	}
-	
+
 	module.exports = Footer
 
 
@@ -1542,44 +1542,44 @@
 	/**
 	 * Module dependencies.
 	 */
-	
+
 	var Emitter = __webpack_require__(15);
 	var clone = __webpack_require__(16);
 	var type = __webpack_require__(17);
 	var ease = __webpack_require__(18);
-	
+
 	/**
 	 * Expose `Tween`.
 	 */
-	
+
 	module.exports = Tween;
-	
+
 	/**
 	 * Initialize a new `Tween` with `obj`.
 	 *
 	 * @param {Object|Array} obj
 	 * @api public
 	 */
-	
+
 	function Tween(obj) {
 	  if (!(this instanceof Tween)) return new Tween(obj);
 	  this._from = obj;
 	  this.ease('linear');
 	  this.duration(500);
 	}
-	
+
 	/**
 	 * Mixin emitter.
 	 */
-	
+
 	Emitter(Tween.prototype);
-	
+
 	/**
 	 * Reset the tween.
 	 *
 	 * @api public
 	 */
-	
+
 	Tween.prototype.reset = function(){
 	  this.isArray = 'array' === type(this._from);
 	  this._curr = clone(this._from);
@@ -1587,7 +1587,7 @@
 	  this._start = Date.now();
 	  return this;
 	};
-	
+
 	/**
 	 * Tween to `obj` and reset internal state.
 	 *
@@ -1597,13 +1597,13 @@
 	 * @return {Tween} self
 	 * @api public
 	 */
-	
+
 	Tween.prototype.to = function(obj){
 	  this.reset();
 	  this._to = obj;
 	  return this;
 	};
-	
+
 	/**
 	 * Set duration to `ms` [500].
 	 *
@@ -1611,12 +1611,12 @@
 	 * @return {Tween} self
 	 * @api public
 	 */
-	
+
 	Tween.prototype.duration = function(ms){
 	  this._duration = ms;
 	  return this;
 	};
-	
+
 	/**
 	 * Set easing function to `fn`.
 	 *
@@ -1626,21 +1626,21 @@
 	 * @return {Tween}
 	 * @api public
 	 */
-	
+
 	Tween.prototype.ease = function(fn){
 	  fn = 'function' == typeof fn ? fn : ease[fn];
 	  if (!fn) throw new TypeError('invalid easing function');
 	  this._ease = fn;
 	  return this;
 	};
-	
+
 	/**
 	 * Stop the tween and immediately emit "stop" and "end".
 	 *
 	 * @return {Tween}
 	 * @api public
 	 */
-	
+
 	Tween.prototype.stop = function(){
 	  this.stopped = true;
 	  this._done = true;
@@ -1648,23 +1648,23 @@
 	  this.emit('end');
 	  return this;
 	};
-	
+
 	/**
 	 * Perform a step.
 	 *
 	 * @return {Tween} self
 	 * @api private
 	 */
-	
+
 	Tween.prototype.step = function(){
 	  if (this._done) return;
-	
+
 	  // duration
 	  var duration = this._duration;
 	  var now = Date.now();
 	  var delta = now - this._start;
 	  var done = delta >= duration;
-	
+
 	  // complete
 	  if (done) {
 	    this._from = this._to;
@@ -1673,7 +1673,7 @@
 	    this.emit('end');
 	    return this;
 	  }
-	
+
 	  // tween
 	  var from = this._from;
 	  var to = this._to;
@@ -1681,26 +1681,26 @@
 	  var fn = this._ease;
 	  var p = (now - this._start) / duration;
 	  var n = fn(p);
-	
+
 	  // array
 	  if (this.isArray) {
 	    for (var i = 0; i < from.length; ++i) {
 	      curr[i] = from[i] + (to[i] - from[i]) * n;
 	    }
-	
+
 	    this._update(curr);
 	    return this;
 	  }
-	
+
 	  // objech
 	  for (var k in from) {
 	    curr[k] = from[k] + (to[k] - from[k]) * n;
 	  }
-	
+
 	  this._update(curr);
 	  return this;
 	};
-	
+
 	/**
 	 * Set update function to `fn` or
 	 * when no argument is given this performs
@@ -1710,7 +1710,7 @@
 	 * @return {Tween} self
 	 * @api public
 	 */
-	
+
 	Tween.prototype.update = function(fn){
 	  if (0 == arguments.length) return this.step();
 	  this._update = fn;
@@ -1725,19 +1725,19 @@
 	/**
 	 * Expose `Emitter`.
 	 */
-	
+
 	module.exports = Emitter;
-	
+
 	/**
 	 * Initialize a new `Emitter`.
 	 *
 	 * @api public
 	 */
-	
+
 	function Emitter(obj) {
 	  if (obj) return mixin(obj);
 	};
-	
+
 	/**
 	 * Mixin the emitter properties.
 	 *
@@ -1745,14 +1745,14 @@
 	 * @return {Object}
 	 * @api private
 	 */
-	
+
 	function mixin(obj) {
 	  for (var key in Emitter.prototype) {
 	    obj[key] = Emitter.prototype[key];
 	  }
 	  return obj;
 	}
-	
+
 	/**
 	 * Listen on the given `event` with `fn`.
 	 *
@@ -1761,7 +1761,7 @@
 	 * @return {Emitter}
 	 * @api public
 	 */
-	
+
 	Emitter.prototype.on =
 	Emitter.prototype.addEventListener = function(event, fn){
 	  this._callbacks = this._callbacks || {};
@@ -1769,7 +1769,7 @@
 	    .push(fn);
 	  return this;
 	};
-	
+
 	/**
 	 * Adds an `event` listener that will be invoked a single
 	 * time then automatically removed.
@@ -1779,18 +1779,18 @@
 	 * @return {Emitter}
 	 * @api public
 	 */
-	
+
 	Emitter.prototype.once = function(event, fn){
 	  function on() {
 	    this.off(event, on);
 	    fn.apply(this, arguments);
 	  }
-	
+
 	  on.fn = fn;
 	  this.on(event, on);
 	  return this;
 	};
-	
+
 	/**
 	 * Remove the given callback for `event` or all
 	 * registered callbacks.
@@ -1800,29 +1800,29 @@
 	 * @return {Emitter}
 	 * @api public
 	 */
-	
+
 	Emitter.prototype.off =
 	Emitter.prototype.removeListener =
 	Emitter.prototype.removeAllListeners =
 	Emitter.prototype.removeEventListener = function(event, fn){
 	  this._callbacks = this._callbacks || {};
-	
+
 	  // all
 	  if (0 == arguments.length) {
 	    this._callbacks = {};
 	    return this;
 	  }
-	
+
 	  // specific event
 	  var callbacks = this._callbacks['$' + event];
 	  if (!callbacks) return this;
-	
+
 	  // remove all handlers
 	  if (1 == arguments.length) {
 	    delete this._callbacks['$' + event];
 	    return this;
 	  }
-	
+
 	  // remove specific handler
 	  var cb;
 	  for (var i = 0; i < callbacks.length; i++) {
@@ -1834,7 +1834,7 @@
 	  }
 	  return this;
 	};
-	
+
 	/**
 	 * Emit `event` with the given args.
 	 *
@@ -1842,22 +1842,22 @@
 	 * @param {Mixed} ...
 	 * @return {Emitter}
 	 */
-	
+
 	Emitter.prototype.emit = function(event){
 	  this._callbacks = this._callbacks || {};
 	  var args = [].slice.call(arguments, 1)
 	    , callbacks = this._callbacks['$' + event];
-	
+
 	  if (callbacks) {
 	    callbacks = callbacks.slice(0);
 	    for (var i = 0, len = callbacks.length; i < len; ++i) {
 	      callbacks[i].apply(this, args);
 	    }
 	  }
-	
+
 	  return this;
 	};
-	
+
 	/**
 	 * Return array of callbacks for `event`.
 	 *
@@ -1865,12 +1865,12 @@
 	 * @return {Array}
 	 * @api public
 	 */
-	
+
 	Emitter.prototype.listeners = function(event){
 	  this._callbacks = this._callbacks || {};
 	  return this._callbacks['$' + event] || [];
 	};
-	
+
 	/**
 	 * Check if this emitter has `event` handlers.
 	 *
@@ -1878,7 +1878,7 @@
 	 * @return {Boolean}
 	 * @api public
 	 */
-	
+
 	Emitter.prototype.hasListeners = function(event){
 	  return !! this.listeners(event).length;
 	};
@@ -1891,27 +1891,27 @@
 	/**
 	 * Module dependencies.
 	 */
-	
+
 	var type;
 	try {
 	  type = __webpack_require__(17);
 	} catch (_) {
 	  type = __webpack_require__(17);
 	}
-	
+
 	/**
 	 * Module exports.
 	 */
-	
+
 	module.exports = clone;
-	
+
 	/**
 	 * Clones objects.
 	 *
 	 * @param {Mixed} any object
 	 * @api public
 	 */
-	
+
 	function clone(obj){
 	  switch (type(obj)) {
 	    case 'object':
@@ -1922,14 +1922,14 @@
 	        }
 	      }
 	      return copy;
-	
+
 	    case 'array':
 	      var copy = new Array(obj.length);
 	      for (var i = 0, l = obj.length; i < l; i++) {
 	        copy[i] = clone(obj[i]);
 	      }
 	      return copy;
-	
+
 	    case 'regexp':
 	      // from millermedeiros/amd-utils - MIT
 	      var flags = '';
@@ -1937,10 +1937,10 @@
 	      flags += obj.global ? 'g' : '';
 	      flags += obj.ignoreCase ? 'i' : '';
 	      return new RegExp(obj.source, flags);
-	
+
 	    case 'date':
 	      return new Date(obj.getTime());
-	
+
 	    default: // string, number, boolean, …
 	      return obj;
 	  }
@@ -1954,9 +1954,9 @@
 	/**
 	 * toString ref.
 	 */
-	
+
 	var toString = Object.prototype.toString;
-	
+
 	/**
 	 * Return the type of `val`.
 	 *
@@ -1964,7 +1964,7 @@
 	 * @return {String}
 	 * @api public
 	 */
-	
+
 	module.exports = function(val){
 	  switch (toString.call(val)) {
 	    case '[object Date]': return 'date';
@@ -1973,16 +1973,16 @@
 	    case '[object Array]': return 'array';
 	    case '[object Error]': return 'error';
 	  }
-	
+
 	  if (val === null) return 'null';
 	  if (val === undefined) return 'undefined';
 	  if (val !== val) return 'nan';
 	  if (val && val.nodeType === 1) return 'element';
-	
+
 	  val = val.valueOf
 	    ? val.valueOf()
 	    : Object.prototype.valueOf.apply(val)
-	
+
 	  return typeof val;
 	};
 
@@ -1993,128 +1993,128 @@
 
 	
 	// easing functions from "Tween.js"
-	
+
 	exports.linear = function(n){
 	  return n;
 	};
-	
+
 	exports.inQuad = function(n){
 	  return n * n;
 	};
-	
+
 	exports.outQuad = function(n){
 	  return n * (2 - n);
 	};
-	
+
 	exports.inOutQuad = function(n){
 	  n *= 2;
 	  if (n < 1) return 0.5 * n * n;
 	  return - 0.5 * (--n * (n - 2) - 1);
 	};
-	
+
 	exports.inCube = function(n){
 	  return n * n * n;
 	};
-	
+
 	exports.outCube = function(n){
 	  return --n * n * n + 1;
 	};
-	
+
 	exports.inOutCube = function(n){
 	  n *= 2;
 	  if (n < 1) return 0.5 * n * n * n;
 	  return 0.5 * ((n -= 2 ) * n * n + 2);
 	};
-	
+
 	exports.inQuart = function(n){
 	  return n * n * n * n;
 	};
-	
+
 	exports.outQuart = function(n){
 	  return 1 - (--n * n * n * n);
 	};
-	
+
 	exports.inOutQuart = function(n){
 	  n *= 2;
 	  if (n < 1) return 0.5 * n * n * n * n;
 	  return -0.5 * ((n -= 2) * n * n * n - 2);
 	};
-	
+
 	exports.inQuint = function(n){
 	  return n * n * n * n * n;
 	}
-	
+
 	exports.outQuint = function(n){
 	  return --n * n * n * n * n + 1;
 	}
-	
+
 	exports.inOutQuint = function(n){
 	  n *= 2;
 	  if (n < 1) return 0.5 * n * n * n * n * n;
 	  return 0.5 * ((n -= 2) * n * n * n * n + 2);
 	};
-	
+
 	exports.inSine = function(n){
 	  return 1 - Math.cos(n * Math.PI / 2 );
 	};
-	
+
 	exports.outSine = function(n){
 	  return Math.sin(n * Math.PI / 2);
 	};
-	
+
 	exports.inOutSine = function(n){
 	  return .5 * (1 - Math.cos(Math.PI * n));
 	};
-	
+
 	exports.inExpo = function(n){
 	  return 0 == n ? 0 : Math.pow(1024, n - 1);
 	};
-	
+
 	exports.outExpo = function(n){
 	  return 1 == n ? n : 1 - Math.pow(2, -10 * n);
 	};
-	
+
 	exports.inOutExpo = function(n){
 	  if (0 == n) return 0;
 	  if (1 == n) return 1;
 	  if ((n *= 2) < 1) return .5 * Math.pow(1024, n - 1);
 	  return .5 * (-Math.pow(2, -10 * (n - 1)) + 2);
 	};
-	
+
 	exports.inCirc = function(n){
 	  return 1 - Math.sqrt(1 - n * n);
 	};
-	
+
 	exports.outCirc = function(n){
 	  return Math.sqrt(1 - (--n * n));
 	};
-	
+
 	exports.inOutCirc = function(n){
 	  n *= 2
 	  if (n < 1) return -0.5 * (Math.sqrt(1 - n * n) - 1);
 	  return 0.5 * (Math.sqrt(1 - (n -= 2) * n) + 1);
 	};
-	
+
 	exports.inBack = function(n){
 	  var s = 1.70158;
 	  return n * n * (( s + 1 ) * n - s);
 	};
-	
+
 	exports.outBack = function(n){
 	  var s = 1.70158;
 	  return --n * n * ((s + 1) * n + s) + 1;
 	};
-	
+
 	exports.inOutBack = function(n){
 	  var s = 1.70158 * 1.525;
 	  if ( ( n *= 2 ) < 1 ) return 0.5 * ( n * n * ( ( s + 1 ) * n - s ) );
 	  return 0.5 * ( ( n -= 2 ) * n * ( ( s + 1 ) * n + s ) + 2 );
 	};
-	
+
 	exports.inBounce = function(n){
 	  return 1 - exports.outBounce(1 - n);
 	};
-	
+
 	exports.outBounce = function(n){
 	  if ( n < ( 1 / 2.75 ) ) {
 	    return 7.5625 * n * n;
@@ -2126,14 +2126,14 @@
 	    return 7.5625 * ( n -= ( 2.625 / 2.75 ) ) * n + 0.984375;
 	  }
 	};
-	
+
 	exports.inOutBounce = function(n){
 	  if (n < .5) return exports.inBounce(n * 2) * .5;
 	  return exports.outBounce(n * 2 - 1) * .5 + .5;
 	};
-	
+
 	// aliases
-	
+
 	exports['in-quad'] = exports.inQuad;
 	exports['out-quad'] = exports.outQuad;
 	exports['in-out-quad'] = exports.inOutQuad;
@@ -2177,13 +2177,13 @@
 	/**
 	 * Expose `parse`.
 	 */
-	
+
 	module.exports = parse;
-	
+
 	/**
 	 * Tests for browser support.
 	 */
-	
+
 	var innerHTMLBug = false;
 	var bugTestDiv;
 	if (typeof document !== 'undefined') {
@@ -2195,11 +2195,11 @@
 	  innerHTMLBug = !bugTestDiv.getElementsByTagName('link').length;
 	  bugTestDiv = undefined;
 	}
-	
+
 	/**
 	 * Wrap map from jquery.
 	 */
-	
+
 	var map = {
 	  legend: [1, '<fieldset>', '</fieldset>'],
 	  tr: [2, '<table><tbody>', '</tbody></table>'],
@@ -2208,19 +2208,19 @@
 	  // in a div with a non-whitespace character in front, ha!
 	  _default: innerHTMLBug ? [1, 'X<div>', '</div>'] : [0, '', '']
 	};
-	
+
 	map.td =
 	map.th = [3, '<table><tbody><tr>', '</tr></tbody></table>'];
-	
+
 	map.option =
 	map.optgroup = [1, '<select multiple="multiple">', '</select>'];
-	
+
 	map.thead =
 	map.tbody =
 	map.colgroup =
 	map.caption =
 	map.tfoot = [1, '<table>', '</table>'];
-	
+
 	map.polyline =
 	map.ellipse =
 	map.polygon =
@@ -2230,7 +2230,7 @@
 	map.path =
 	map.rect =
 	map.g = [1, '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">','</svg>'];
-	
+
 	/**
 	 * Parse `html` and return a DOM Node instance, which could be a TextNode,
 	 * HTML DOM Node of some kind (<div> for example), or a DocumentFragment
@@ -2241,28 +2241,28 @@
 	 * @return {DOMNode} the TextNode, DOM Node, or DocumentFragment instance
 	 * @api private
 	 */
-	
+
 	function parse(html, doc) {
 	  if ('string' != typeof html) throw new TypeError('String expected');
-	
+
 	  // default to the global `document` object
 	  if (!doc) doc = document;
-	
+
 	  // tag name
 	  var m = /<([\w:]+)/.exec(html);
 	  if (!m) return doc.createTextNode(html);
-	
+
 	  html = html.replace(/^\s+|\s+$/g, ''); // Remove leading/trailing whitespace
-	
+
 	  var tag = m[1];
-	
+
 	  // body support
 	  if (tag == 'body') {
 	    var el = doc.createElement('html');
 	    el.innerHTML = html;
 	    return el.removeChild(el.lastChild);
 	  }
-	
+
 	  // wrap map
 	  var wrap = map[tag] || map._default;
 	  var depth = wrap[0];
@@ -2271,18 +2271,18 @@
 	  var el = doc.createElement('div');
 	  el.innerHTML = prefix + html + suffix;
 	  while (depth--) el = el.lastChild;
-	
+
 	  // one element
 	  if (el.firstChild == el.lastChild) {
 	    return el.removeChild(el.firstChild);
 	  }
-	
+
 	  // several elements
 	  var fragment = doc.createDocumentFragment();
 	  while (el.firstChild) {
 	    fragment.appendChild(el.removeChild(el.firstChild));
 	  }
-	
+
 	  return fragment;
 	}
 
@@ -2292,13 +2292,13 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.transition = __webpack_require__(22)
-	
+
 	exports.transform = __webpack_require__(23)
-	
+
 	exports.touchAction = __webpack_require__(24)
-	
+
 	exports.transitionend = __webpack_require__(25)
-	
+
 	exports.has3d = __webpack_require__(26)
 
 
@@ -2313,10 +2313,10 @@
 	  'OTransition',
 	  'msTransition'
 	]
-	
+
 	var el = document.createElement('p')
 	var style
-	
+
 	for (var i = 0; i < styles.length; i++) {
 	  if (null != el.style[styles[i]]) {
 	    style = styles[i]
@@ -2324,7 +2324,7 @@
 	  }
 	}
 	el = null
-	
+
 	module.exports = style
 
 
@@ -2340,10 +2340,10 @@
 	  'OTransform',
 	  'transform'
 	];
-	
+
 	var el = document.createElement('p');
 	var style;
-	
+
 	for (var i = 0; i < styles.length; i++) {
 	  style = styles[i];
 	  if (null != el.style[style]) {
@@ -2361,13 +2361,13 @@
 	/**
 	 * Module exports.
 	 */
-	
+
 	module.exports = touchActionProperty();
-	
+
 	/**
 	 * Returns "touchAction", "msTouchAction", or null.
 	 */
-	
+
 	function touchActionProperty(doc) {
 	  if (!doc) doc = document;
 	  var div = doc.createElement('div');
@@ -2386,7 +2386,7 @@
 	/**
 	 * Transition-end mapping
 	 */
-	
+
 	var map = {
 	  'WebkitTransition' : 'webkitTransitionEnd',
 	  'MozTransition' : 'transitionend',
@@ -2394,13 +2394,13 @@
 	  'msTransition' : 'MSTransitionEnd',
 	  'transition' : 'transitionend'
 	};
-	
+
 	/**
 	 * Expose `transitionend`
 	 */
-	
+
 	var el = document.createElement('p');
-	
+
 	for (var transition in map) {
 	  if (null != el.style[transition]) {
 	    module.exports = map[transition];
@@ -2415,11 +2415,11 @@
 
 	
 	var prop = __webpack_require__(23);
-	
+
 	// IE <=8 doesn't have `getComputedStyle`
 	if (!prop || !window.getComputedStyle) {
 	  module.exports = false;
-	
+
 	} else {
 	  var map = {
 	    webkitTransform: '-webkit-transform',
@@ -2428,7 +2428,7 @@
 	    MozTransform: '-moz-transform',
 	    transform: 'transform'
 	  };
-	
+
 	  // from: https://gist.github.com/lorenzopolidori/3794226
 	  var el = document.createElement('div');
 	  el.style[prop] = 'translate3d(1px,1px,1px)';
@@ -2447,16 +2447,16 @@
 	/**
 	 * Module dependencies.
 	 */
-	
+
 	var events = __webpack_require__(28);
 	var delegate = __webpack_require__(29);
-	
+
 	/**
 	 * Expose `Events`.
 	 */
-	
+
 	module.exports = Events;
-	
+
 	/**
 	 * Initialize an `Events` with the given
 	 * `el` object which events will be bound to,
@@ -2466,7 +2466,7 @@
 	 * @param {Object} obj
 	 * @api public
 	 */
-	
+
 	function Events(el, obj) {
 	  if (!(this instanceof Events)) return new Events(el, obj);
 	  if (!el) throw new Error('element required');
@@ -2475,16 +2475,16 @@
 	  this.obj = obj;
 	  this._events = {};
 	}
-	
+
 	/**
 	 * Subscription helper.
 	 */
-	
+
 	Events.prototype.sub = function(event, method, cb){
 	  this._events[event] = this._events[event] || {};
 	  this._events[event][method] = cb;
 	};
-	
+
 	/**
 	 * Bind to `event` with optional `method` name.
 	 * When `method` is undefined it becomes `event`
@@ -2510,7 +2510,7 @@
 	 * @return {Function} callback
 	 * @api public
 	 */
-	
+
 	Events.prototype.bind = function(event, method){
 	  var e = parse(event);
 	  var el = this.el;
@@ -2518,26 +2518,26 @@
 	  var name = e.name;
 	  var method = method || 'on' + name;
 	  var args = [].slice.call(arguments, 2);
-	
+
 	  // callback
 	  function cb(){
 	    var a = [].slice.call(arguments).concat(args);
 	    obj[method].apply(obj, a);
 	  }
-	
+
 	  // bind
 	  if (e.selector) {
 	    cb = delegate.bind(el, e.selector, name, cb);
 	  } else {
 	    events.bind(el, name, cb);
 	  }
-	
+
 	  // subscription for unbinding
 	  this.sub(name, method, cb);
-	
+
 	  return cb;
 	};
-	
+
 	/**
 	 * Unbind a single binding, all bindings for `event`,
 	 * or all bindings within the manager.
@@ -2560,50 +2560,50 @@
 	 * @param {String|Function} [method]
 	 * @api public
 	 */
-	
+
 	Events.prototype.unbind = function(event, method){
 	  if (0 == arguments.length) return this.unbindAll();
 	  if (1 == arguments.length) return this.unbindAllOf(event);
-	
+
 	  // no bindings for this event
 	  var bindings = this._events[event];
 	  if (!bindings) return;
-	
+
 	  // no bindings for this method
 	  var cb = bindings[method];
 	  if (!cb) return;
-	
+
 	  events.unbind(this.el, event, cb);
 	};
-	
+
 	/**
 	 * Unbind all events.
 	 *
 	 * @api private
 	 */
-	
+
 	Events.prototype.unbindAll = function(){
 	  for (var event in this._events) {
 	    this.unbindAllOf(event);
 	  }
 	};
-	
+
 	/**
 	 * Unbind all events for `event`.
 	 *
 	 * @param {String} event
 	 * @api private
 	 */
-	
+
 	Events.prototype.unbindAllOf = function(event){
 	  var bindings = this._events[event];
 	  if (!bindings) return;
-	
+
 	  for (var method in bindings) {
 	    this.unbind(event, method);
 	  }
 	};
-	
+
 	/**
 	 * Parse `event`.
 	 *
@@ -2611,7 +2611,7 @@
 	 * @return {Object}
 	 * @api private
 	 */
-	
+
 	function parse(event) {
 	  var parts = event.split(/ +/);
 	  return {
@@ -2628,7 +2628,7 @@
 	var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
 	    unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
 	    prefix = bind !== 'addEventListener' ? 'on' : '';
-	
+
 	/**
 	 * Bind `el` event `type` to `fn`.
 	 *
@@ -2639,12 +2639,12 @@
 	 * @return {Function}
 	 * @api public
 	 */
-	
+
 	exports.bind = function(el, type, fn, capture){
 	  el[bind](prefix + type, fn, capture || false);
 	  return fn;
 	};
-	
+
 	/**
 	 * Unbind `el` event `type`'s callback `fn`.
 	 *
@@ -2655,7 +2655,7 @@
 	 * @return {Function}
 	 * @api public
 	 */
-	
+
 	exports.unbind = function(el, type, fn, capture){
 	  el[unbind](prefix + type, fn, capture || false);
 	  return fn;
@@ -2668,10 +2668,10 @@
 	/**
 	 * Module dependencies.
 	 */
-	
+
 	var closest = __webpack_require__(30)
 	  , event = __webpack_require__(28);
-	
+
 	/**
 	 * Delegate event `type` to `selector`
 	 * and invoke `fn(e)`. A callback function
@@ -2685,7 +2685,7 @@
 	 * @return {Function}
 	 * @api public
 	 */
-	
+
 	exports.bind = function(el, selector, type, fn, capture){
 	  return event.bind(el, type, function(e){
 	    var target = e.target || e.srcElement;
@@ -2693,7 +2693,7 @@
 	    if (e.delegateTarget) fn.call(el, e);
 	  }, capture);
 	};
-	
+
 	/**
 	 * Unbind event `type`'s callback `fn`.
 	 *
@@ -2703,7 +2703,7 @@
 	 * @param {Boolean} capture
 	 * @api public
 	 */
-	
+
 	exports.unbind = function(el, type, fn, capture){
 	  event.unbind(el, type, fn, capture);
 	};
@@ -2716,15 +2716,15 @@
 	/**
 	 * Module Dependencies
 	 */
-	
+
 	var matches = __webpack_require__(31)
-	
+
 	/**
 	 * Export `closest`
 	 */
-	
+
 	module.exports = closest
-	
+
 	/**
 	 * Closest
 	 *
@@ -2732,16 +2732,16 @@
 	 * @param {String} selector
 	 * @param {Element} scope (optional)
 	 */
-	
+
 	function closest (el, selector, scope) {
 	  scope = scope || document.documentElement;
-	
+
 	  // walk up the dom
 	  while (el && el !== scope) {
 	    if (matches(el, selector)) return el;
 	    el = el.parentNode;
 	  }
-	
+
 	  // check scope for match
 	  return matches(el, selector) ? el : null;
 	}
@@ -2754,31 +2754,31 @@
 	/**
 	 * Module dependencies.
 	 */
-	
+
 	var query = __webpack_require__(32);
-	
+
 	/**
 	 * Element prototype.
 	 */
-	
+
 	var proto = Element.prototype;
-	
+
 	/**
 	 * Vendor function.
 	 */
-	
+
 	var vendor = proto.matches
 	  || proto.webkitMatchesSelector
 	  || proto.mozMatchesSelector
 	  || proto.msMatchesSelector
 	  || proto.oMatchesSelector;
-	
+
 	/**
 	 * Expose `match()`.
 	 */
-	
+
 	module.exports = match;
-	
+
 	/**
 	 * Match `el` to `selector`.
 	 *
@@ -2787,7 +2787,7 @@
 	 * @return {Boolean}
 	 * @api public
 	 */
-	
+
 	function match(el, selector) {
 	  if (!el || el.nodeType !== 1) return false;
 	  if (vendor) return vendor.call(el, selector);
@@ -2806,17 +2806,17 @@
 	function one(selector, el) {
 	  return el.querySelector(selector);
 	}
-	
+
 	exports = module.exports = function(selector, el){
 	  el = el || document;
 	  return one(selector, el);
 	};
-	
+
 	exports.all = function(selector, el){
 	  el = el || document;
 	  return el.querySelectorAll(selector);
 	};
-	
+
 	exports.engine = function(obj){
 	  if (!obj.one) throw new Error('.one callback required');
 	  if (!obj.all) throw new Error('.all callback required');
@@ -2833,41 +2833,41 @@
 	var endEvents = [
 	  'touchend'
 	]
-	
+
 	module.exports = Tap
-	
+
 	// default tap timeout in ms
 	Tap.timeout = 200
-	
+
 	function Tap(callback, options) {
 	  options = options || {}
 	  // if the user holds his/her finger down for more than 200ms,
 	  // then it's not really considered a tap.
 	  // however, you can make this configurable.
 	  var timeout = options.timeout || Tap.timeout
-	
+
 	  // to keep track of the original listener
 	  listener.handler = callback
-	
+
 	  return listener
-	
+
 	  // el.addEventListener('touchstart', listener)
 	  function listener(e1) {
 	    // tap should only happen with a single finger
 	    if (!e1.touches || e1.touches.length > 1) return
-	
+
 	    var el = e1.target
 	    var context = this
 	    var args = arguments;
-	
+
 	    var timeout_id = setTimeout(cleanup, timeout)
-	
+
 	    el.addEventListener('touchmove', cleanup)
-	
+
 	    endEvents.forEach(function (event) {
 	      el.addEventListener(event, done)
 	    })
-	
+
 	    function done(e2) {
 	      // since touchstart is added on the same tick
 	      // and because of bubbling,
@@ -2875,31 +2875,31 @@
 	      // this filters out the same touchstart event.
 	      if (e1 === e2) return
 	      if (e2.clientX !== e1.clientX || e2.clientY !== e1.clientY) return
-	
+
 	      cleanup()
-	
+
 	      // already handled
 	      if (e2.defaultPrevented) return
-	
+
 	      // overwrite these functions so that they all to both start and events.
 	      var preventDefault = e1.preventDefault
 	      var stopPropagation = e1.stopPropagation
-	
+
 	      e1.stopPropagation = function () {
 	        stopPropagation.call(e1)
 	        stopPropagation.call(e2)
 	      }
-	
+
 	      e1.preventDefault = function () {
 	        preventDefault.call(e1)
 	        preventDefault.call(e2)
 	      }
-	
+
 	      // calls the handler with the `end` event,
 	      // but i don't think it matters.
 	      callback.apply(context, args)
 	    }
-	
+
 	    // cleanup end events
 	    // to cancel the tap, just run this early
 	    function cleanup(e2) {
@@ -2907,11 +2907,11 @@
 	      // then don't actually cleanup.
 	      // hit issues with this - don't remember
 	      if (e1 === e2) return
-	
+
 	      clearTimeout(timeout_id)
-	
+
 	      el.removeEventListener('touchmove', cleanup)
-	
+
 	      endEvents.forEach(function (event) {
 	        el.removeEventListener(event, done)
 	      })
@@ -2926,7 +2926,7 @@
 
 	var Iscroll = __webpack_require__(35)
 	var Loader = __webpack_require__(40)
-	
+
 	function Ptr(scrollable, cb) {
 	  var is = new Iscroll(scrollable, {
 	    handlebar: true,
@@ -2976,7 +2976,7 @@
 	    }
 	  })
 	}
-	
+
 	module.exports = Ptr
 
 
@@ -2997,9 +2997,9 @@
 	var max = Math.max
 	var min = Math.min
 	var now = Date.now
-	
+
 	var defineProperty = Object.defineProperty
-	
+
 	/**
 	 * Create custom event
 	 *
@@ -3021,7 +3021,7 @@
 	  }
 	  return e
 	}
-	
+
 	/**
 	 * Init iscroll with el and optional options
 	 * options.handlebar show handlebar if is true
@@ -3067,9 +3067,9 @@
 	  window.addEventListener('orientationchange', this._refresh, false)
 	  window.addEventListener('resize', this._refresh, false)
 	}
-	
+
 	Emitter(Iscroll.prototype)
-	
+
 	/**
 	 * Bind events
 	 *
@@ -3078,14 +3078,15 @@
 	Iscroll.prototype.bind = function () {
 	  this.events = events(this.scrollable, this)
 	  this.docEvents = events(document, this)
-	
+
 	   // W3C touch events
 	  this.events.bind('touchstart')
 	  this.events.bind('touchmove')
+	  this.events.bind('touchleave', 'ontouchend')
 	  this.docEvents.bind('touchend')
 	  this.docEvents.bind('touchcancel', 'ontouchend')
 	}
-	
+
 	/**
 	 * Recalculate the height
 	 *
@@ -3094,8 +3095,9 @@
 	Iscroll.prototype.refresh = function () {
 	  this.viewHeight = this.scrollable.getBoundingClientRect().height
 	  this.height = this.el.getBoundingClientRect().height
+	  this.minY = min(0, this.viewHeight - this.height)
 	}
-	
+
 	/**
 	 * Unbind all event listeners, and remove handlebar if necessary
 	 *
@@ -3109,14 +3111,8 @@
 	  window.removeEventListener('resize', this._refresh, false)
 	  if (this.handlebar) this.scrollable.removeChild(this.handlebar.el)
 	}
-	
-	Iscroll.prototype.restrict = function (y) {
-	  y = min(y , this.max)
-	  var h = Math.max(this.height, this.viewHeight)
-	  y = max(y , this.viewHeight - h - this.max)
-	  return y
-	}
-	
+
+
 	/**
 	 * touchstart event handler
 	 *
@@ -3127,16 +3123,23 @@
 	  this.speed = null
 	  if (this.tween) this.tween.stop()
 	  this.refresh()
-	
+	  var start = this.y
+	  if (e.target === this.scrollable) {
+	    start = min(start , 0)
+	    start = max(start , this.minY)
+	    // fix the invalid start position
+	    if (start !== this.y) return this.scrollTo(start, 200)
+	    return
+	  }
+
 	  var touch = this.getTouch(e)
 	  var sx = touch.clientX
 	  var sy = touch.clientY
-	  var start = this.y
+
+
 	  this.onstart = function (x, y) {
 	    // no moved up and down, so don't know
 	    if (sy === y) return
-	    // no scroll up for less content
-	    if (this.height <= this.viewHeight && y < sy) return
 	    this.onstart = null
 	    var dx = Math.abs(x - sx)
 	    var dy = Math.abs(y - sy)
@@ -3155,7 +3158,7 @@
 	    return true
 	  }
 	}
-	
+
 	/**
 	 * touchmove event handler
 	 *
@@ -3163,8 +3166,8 @@
 	 * @api private
 	 */
 	Iscroll.prototype.ontouchmove = function (e) {
-	  if (!this.down && !this.onstart) return
 	  e.preventDefault()
+	  if (!this.down && !this.onstart) return
 	  var touch = this.getTouch(e)
 	  var x = touch.clientX
 	  var y = touch.clientY
@@ -3174,17 +3177,16 @@
 	  }
 	  var down = this.down
 	  var dy = this.dy = y - down.y
-	
-	  // no move if contentHeight < viewHeight and move up
-	  if (this.height <= this.viewHeight && dy < 0) return
-	
+
 	  //calculate speed every 100 milisecond
 	  this.calcuteSpeed(touch.clientY, down.at)
 	  var start = this.down.start
-	  var dest = this.restrict(start + dy)
+	  var dest = start + dy
+	  dest = min(dest , this.max)
+	  dest = max(dest , this.minY - this.max)
 	  this.translate(dest)
 	}
-	
+
 	/**
 	 * Calcute speed by clientY
 	 *
@@ -3204,7 +3206,7 @@
 	    this.clientY = y
 	  }
 	}
-	
+
 	/**
 	 * Event handler for touchend
 	 *
@@ -3221,7 +3223,7 @@
 	  this.scrollTo(m.dest, m.duration, m.ease)
 	  this.emit('release', this.y)
 	}
-	
+
 	/**
 	 * Calculate the animate props for moveon
 	 *
@@ -3235,22 +3237,18 @@
 	  var y = this.y
 	  var destination = y + ( speed * speed ) / ( 2 * deceleration ) * ( this.distance < 0 ? -1 : 1 )
 	  var duration = speed / deceleration
-	  var newY, ease
-	  var maxY = this.viewHeight - this.height
-	  if (destination > 0) {
-	    newY = 0
-	    ease = 'out-back'
-	  } else if (destination < maxY) {
-	    newY = maxY
-	    ease = 'out-back'
-	  }
-	  if (typeof newY === 'number') {
-	    duration = duration*(newY - y + 160)/(destination - y)
-	    destination = newY
-	  }
-	  if (y > 0 || y < maxY) {
-	    duration = 500
+	  var ease
+	  var minY = this.minY
+	  if (y > 0 || y < minY) {
+	    duration = 400
 	    ease = 'out-circ'
+	    destination = y > 0 ? 0 : minY
+	  } else if (destination > 0) {
+	    destination = 0
+	    ease = 'out-back'
+	  } else if (destination < minY) {
+	    destination = minY
+	    ease = 'out-back'
 	  }
 	  return {
 	    dest: destination,
@@ -3258,8 +3256,8 @@
 	    ease: ease
 	  }
 	}
-	
-	
+
+
 	/**
 	 * Scroll to potions y with optional duration and ease function
 	 *
@@ -3275,33 +3273,36 @@
 	    this.translate(y)
 	    return this.onScrollEnd()
 	  }
-	
+
 	  easing = easing || 'out-cube'
 	  var tween = this.tween = Tween({y : this.y})
 	      .ease(easing)
 	      .to({y: y})
 	      .duration(duration)
-	
+
 	  var self = this
 	  tween.update(function(o) {
 	    self.translate(o.y)
 	  })
-	
-	  tween.on('end', function () {
-	    animate = function(){} // eslint-disable-line
-	    if (!tween.stopped) {
-	      self.onScrollEnd()
-	    }
+	  var promise = new Promise(function (resolve) {
+	    tween.on('end', function () {
+	      resolve()
+	      animate = function(){} // eslint-disable-line
+	      if (!tween.stopped) {
+	        self.onScrollEnd()
+	      }
+	    })
 	  })
-	
+
 	  function animate() {
 	    raf(animate)
 	    tween.update()
 	  }
-	
+
 	  animate()
+	  return promise
 	}
-	
+
 	/**
 	 * Scrollend
 	 *
@@ -3316,14 +3317,14 @@
 	    bottom: bottom
 	  })
 	}
-	
+
 	/**
 	 * Gets the appropriate "touch" object for the `e` event. The event may be from
 	 * a "mouse", "touch", or "Pointer" event, so the normalization happens here.
 	 *
 	 * @api private
 	 */
-	
+
 	Iscroll.prototype.getTouch = function(e){
 	  // "mouse" and "Pointer" events just use the event object itself
 	  var touch = e
@@ -3333,15 +3334,15 @@
 	  }
 	  return touch
 	}
-	
-	
+
+
 	/**
 	 * Translate to `x`.
 	 *
 	 *
 	 * @api private
 	 */
-	
+
 	Iscroll.prototype.translate = function(y) {
 	  var s = this.el.style
 	  if (isNaN(y)) return
@@ -3358,20 +3359,20 @@
 	    s[transform] = 'translateY(' + y + 'px)'
 	  }
 	}
-	
+
 	/**
 	 * Sets the "touchAction" CSS style property to `value`.
 	 *
 	 * @api private
 	 */
-	
+
 	Iscroll.prototype.touchAction = function(value){
 	  var s = this.el.style
 	  if (touchAction) {
 	    s[touchAction] = value
 	  }
 	}
-	
+
 	/**
 	 * Transform handlebar
 	 *
@@ -3385,7 +3386,7 @@
 	  var y = parseInt(- bh * this.y/ih)
 	  this.handlebar.translateY(y)
 	}, 100)
-	
+
 	/**
 	 * show the handlebar and size it
 	 * @api public
@@ -3394,7 +3395,7 @@
 	  var h = this.viewHeight * this.viewHeight/this.height
 	  this.handlebar.resize(h)
 	}
-	
+
 	/**
 	 * Hide handlebar
 	 *
@@ -3403,7 +3404,7 @@
 	Iscroll.prototype.hideHandlebar = function () {
 	  if (this.handlebar) this.handlebar.hide()
 	}
-	
+
 	module.exports = Iscroll
 
 
@@ -3412,13 +3413,13 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports.transition = __webpack_require__(37)
-	
+
 	exports.transform = __webpack_require__(23)
-	
+
 	exports.touchAction = __webpack_require__(24)
-	
+
 	exports.transitionend = __webpack_require__(25)
-	
+
 	exports.has3d = __webpack_require__(26)
 
 
@@ -3433,10 +3434,10 @@
 	  'msTransition',
 	  'transition'
 	]
-	
+
 	var el = document.createElement('p')
 	var style
-	
+
 	for (var i = 0; i < styles.length; i++) {
 	  if (null != el.style[styles[i]]) {
 	    style = styles[i]
@@ -3444,7 +3445,7 @@
 	  }
 	}
 	el = null
-	
+
 	module.exports = style
 
 
@@ -3453,7 +3454,7 @@
 /***/ function(module, exports) {
 
 	module.exports = throttle;
-	
+
 	/**
 	 * Returns a new function that, when invoked, invokes `func` at most once per `wait` milliseconds.
 	 *
@@ -3461,11 +3462,11 @@
 	 * @param {Number} wait Number of milliseconds that must elapse between `func` invocations.
 	 * @return {Function} A new function that wraps the `func` function passed in.
 	 */
-	
+
 	function throttle (func, wait) {
 	  var ctx, args, rtn, timeoutID; // caching
 	  var last = 0;
-	
+
 	  return function throttled () {
 	    ctx = this;
 	    args = arguments;
@@ -3475,7 +3476,7 @@
 	      else timeoutID = setTimeout(call, wait - delta);
 	    return rtn;
 	  };
-	
+
 	  function call () {
 	    timeoutID = 0;
 	    last = +new Date();
@@ -3493,7 +3494,7 @@
 	var detect = __webpack_require__(36)
 	var has3d = detect.has3d
 	var transform = detect.transform
-	
+
 	/**
 	 * Handlebar contructor
 	 *
@@ -3506,7 +3507,7 @@
 	  el.className = 'iscroll-handlebar'
 	  scrollable.appendChild(el)
 	}
-	
+
 	/**
 	 * Show the handlebar and resize it
 	 *
@@ -3518,7 +3519,7 @@
 	  s.height = h + 'px'
 	  s.backgroundColor = 'rgba(0,0,0,0.3)'
 	}
-	
+
 	/**
 	 * Hide this handlebar
 	 *
@@ -3527,7 +3528,7 @@
 	handlebar.prototype.hide = function () {
 	  this.el.style.backgroundColor = 'transparent'
 	}
-	
+
 	/**
 	 * Move handlebar by translateY
 	 *
@@ -3542,7 +3543,7 @@
 	    s[transform] = 'translateY(' + y + 'px)'
 	  }
 	}
-	
+
 	module.exports = handlebar
 
 
@@ -3553,7 +3554,7 @@
 	var autoscale = __webpack_require__(11)
 	var PI = Math.PI
 	var raf = __webpack_require__(12)
-	
+
 	var total = 120
 	function Loader(el) {
 	  this.el = el
@@ -3569,7 +3570,7 @@
 	  window.addEventListener('orientationchange', this._onresize, false)
 	  window.addEventListener('resize', this._onresize, false)
 	}
-	
+
 	Loader.prototype.resize = function () {
 	  var el = this.el
 	  this.width = el.clientWidth
@@ -3579,11 +3580,11 @@
 	  canvas.width = this.width
 	  autoscale(canvas)
 	}
-	
+
 	Loader.prototype.setColor = function (color) {
 	  this.color = color
 	}
-	
+
 	Loader.prototype.draw = function (top) {
 	  var ctx = this.ctx
 	  ctx.setTransform(window.devicePixelRatio || 1 ,0 ,0 ,window.devicePixelRatio || 1 ,0, 0);
@@ -3591,7 +3592,7 @@
 	  this.drawRect(top)
 	  this.drawCircle(top)
 	}
-	
+
 	Loader.prototype.drawRect = function (t, max) {
 	  var ctx = this.ctx
 	  ctx.fillStyle = this.color
@@ -3614,7 +3615,7 @@
 	    ctx.fill()
 	  }
 	}
-	
+
 	Loader.prototype.drawCircle = function (t, start, end) {
 	  var ctx = this.ctx
 	  ctx.beginPath()
@@ -3651,7 +3652,7 @@
 	  ctx.stroke()
 	  return y
 	}
-	
+
 	Loader.prototype.load = function (duration) {
 	  // start loading
 	  this.stopped = false
@@ -3678,7 +3679,7 @@
 	  }
 	  raf(animate)
 	}
-	
+
 	Loader.prototype.check = function () {
 	  this.color = '#00BB67'
 	  this.stopped = true
@@ -3701,12 +3702,12 @@
 	  }
 	  raf(animate)
 	}
-	
+
 	Loader.prototype.error = function () {
 	  this.color = '#FF543D'
 	  this.stopped = true
 	}
-	
+
 	Loader.prototype.drawCorrect = function (x, y, p) {
 	  var l = 4.8
 	  var tl = 2.618*l
@@ -3728,15 +3729,14 @@
 	  }
 	  ctx.stroke()
 	}
-	
+
 	function outBack(n){
 	  var s = 1.70158;
 	  return --n * n * ((s + 1) * n + s) + 1;
 	}
-	
+
 	module.exports = Loader
 
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=commons.chunk.js.map

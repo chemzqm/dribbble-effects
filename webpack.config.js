@@ -18,6 +18,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new CommonsChunkPlugin('commons.chunk.js')
+    new CommonsChunkPlugin({
+      name: 'commons',
+      minChunks: 2
+    })
   ]
 }

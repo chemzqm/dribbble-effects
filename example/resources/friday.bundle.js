@@ -9,7 +9,7 @@ webpackJsonp([0],[
 	    e.preventDefault()
 	  })
 	}
-	
+
 	screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
 	try {
 	if (screen.lockOrientationUniversal && screen.lockOrientationUniversal("landscape-primary")) {
@@ -17,13 +17,13 @@ webpackJsonp([0],[
 	  // https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation
 	}
 	} catch (e) { } // eslint-disable-line
-	
+
 	var Friday = __webpack_require__(4).friday
-	
+
 	var el = document.getElementById('main')
 	var dateEl = document.getElementById('date')
 	var f = new Friday(el, dateEl)
-	
+
 	// show time
 	f.process.then(function() {
 	  if (stopped) return Promise.reject()
@@ -39,12 +39,12 @@ webpackJsonp([0],[
 	}).catch(function() {
 	  return false
 	})
-	
+
 	var stopped
 	function stop() {
 	  stopped = true
 	}
-	
+
 	var container = document.querySelector('.container')
 	container.addEventListener('touchstart', stop, false)
 	container.addEventListener('mousedown', stop, false)
@@ -52,4 +52,3 @@ webpackJsonp([0],[
 
 /***/ }
 ]);
-//# sourceMappingURL=friday.bundle.js.map
